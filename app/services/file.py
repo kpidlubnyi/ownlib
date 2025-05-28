@@ -28,7 +28,7 @@ class FileService:
         if not re.match(r'^[a-z]{2}$', language):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="The language code must consist of two lowercase Latin letters (for example: en, uk, pl, ru)"
+                detail=""
             )
         
         return language

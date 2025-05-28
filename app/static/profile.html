@@ -388,9 +388,11 @@
                 if (uploadForm && !uploadForm.dataset.listenerAttached) {
                     uploadForm.addEventListener('submit', (e) => {
                         e.preventDefault();
+                        console.log('📤 Upload form submitted');
                         this.handleBookUpload();
                     });
                     uploadForm.dataset.listenerAttached = 'true';
+                    console.log('✅ Upload form listener attached');
                 }
 
                 const exportBtn = document.getElementById('export-library');
@@ -422,20 +424,100 @@
                 });
 
                 this.setupDragAndDrop();
-                if (uploadForm && !uploadForm.dataset.listenerAttached) {
-                    uploadForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        console.log('📤 Upload form submitted');
-                        this.handleBookUpload();
-                    });
-                    uploadForm.dataset.listenerAttached = 'true';
-                    console.log('✅ Upload form listener attached');
-                }
+                this.setupLanguageSelection();
 
                 this.listenersAttached = true;
                 console.log('✅ Event listeners installed with protection');
             }
 
+            setupLanguageSelection() {
+                const languageSelect = document.getElementById('upload-book-language');
+                const customLanguageInput = document.getElementById('upload-book-language-custom');
+                
+                if (!languageSelect || !customLanguageInput) {
+                    console.warn('Language selection elements not found');
+                    return;
+                }
+
+                if (languageSelect.dataset.listenerAttached === 'true') {
+                    console.log('Language select listener already attached');
+                    return;
+                }
+
+                console.log('🔧 Setting up language selection...');
+
+                languageSelect.addEventListener('change', (e) => {
+                    console.log('Language select changed to:', e.target.value);
+                    
+                    if (e.target.value === 'custom') {
+                        customLanguageInput.style.display = 'block';
+                        customLanguageInput.setAttribute('required', 'required');
+                        customLanguageInput.placeholder = 'Enter the language code (2 letters, for example: ja, ko, ar)';
+                        
+                        setTimeout(() => {
+                            customLanguageInput.focus();
+                        }, 100);
+                        
+                        this.showMessage('Enter the two-character language code (ISO 639-1), for example: ja for Japanese, ko for Korean', 'info');
+                    } else {
+                        customLanguageInput.style.display = 'none';
+                        customLanguageInput.removeAttribute('required');
+                        customLanguageInput.value = '';
+                        customLanguageInput.style.borderColor = '';
+                    }
+                });
+                
+                languageSelect.dataset.listenerAttached = 'true';
+
+                if (!customLanguageInput.dataset.listenerAttached) {
+                    customLanguageInput.addEventListener('input', (e) => {
+                        console.log('Custom language input changed to:', e.target.value);
+                        this.validateLanguageInput(e.target);
+                    });
+                    
+                    customLanguageInput.addEventListener('focus', () => {
+                        this.showMessage('Enter the two-character language code (ISO 639-1), for example: ja for Japanese, ko for Korean', 'info');
+                    });
+                    
+                    customLanguageInput.dataset.listenerAttached = 'true';
+                }
+                
+                console.log('✅ Language selection listeners attached successfully');
+            }
+
+            static validateLanguageInput(input) {
+                if (!input) {
+                    console.warn('No input provided to validateLanguageInput');
+                    return false;
+                }
+                
+                console.log('🔍 Validating language input:', input.value);
+                
+                let value = input.value.toLowerCase().replace(/[^a-z]/g, '');
+                
+                if (value.length > 2) {
+                    value = value.substring(0, 2);
+                }
+                
+                input.value = value;
+                
+                const isValid = value.length === 2 && /^[a-z]{2}$/.test(value);
+                
+                console.log('📋 Validation result:', { value, isValid, length: value.length });
+                
+                if (value.length === 0) {
+                    input.style.borderColor = '';
+                    input.style.backgroundColor = '';
+                } else if (isValid) {
+                    input.style.borderColor = '#4caf50';
+                    input.style.backgroundColor = '#f0fff0'; 
+                } else {
+                    input.style.borderColor = '#f44336'; 
+                    input.style.backgroundColor = '#fff5f5';
+                }
+                
+                return isValid;
+            }
             setupDragAndDrop() {
                 const fileInput = document.getElementById('upload-book-file');
                 const form = document.getElementById('upload-book-form');
@@ -1122,34 +1204,185 @@
                 
                 if (window.currentUpload) {
                     console.log('🛑 Another upload in progress, blocked!');
-                    this.showMessage('Please wait, the preview is not yet complete', 'warning');
+                    this.showMessage('Please wait, the preload is not yet complete', 'warning');
                     return;
                 }
                 
                 window.currentUpload = uploadKey;
+                console.log('📤 Starting upload with key:', uploadKey);
                 
                 try {
+                    const form = document.getElementById('upload-book-form');
+                    if (!form) {
+                        throw new Error('Upload form not found');
+                    }
+
+                    const fileInput = document.getElementById('upload-book-file');
+                    const titleInput = document.getElementById('upload-book-title');
+                    const authorInput = document.getElementById('upload-book-author');
                     
+                    if (!fileInput || !titleInput) {
+                        throw new Error('Required form elements not found');
+                    }
+
+                    const file = fileInput.files[0];
+                    const title = titleInput.value.trim();
+                    const author = authorInput ? authorInput.value.trim() : '';
+                    const language = this.getLanguageFromForm();
+
+                    console.log('📋 Collected form data:', { 
+                        hasFile: !!file, 
+                        title, 
+                        author, 
+                        language,
+                        fileSize: file ? file.size : 0,
+                        fileName: file ? file.name : 'none'
+                    });
+
+                    if (!file) {
+                        throw new Error('Select a file to upload');
+                    }
+
+                    if (!title) {
+                        titleInput.focus();
+                        throw new Error('Enter the title of the book');
+                    }
+
+                    if (!language) {
+                        document.getElementById('upload-book-language').focus();
+                        throw new Error('Select or enter the language of the book');
+                    }
+
+                    if (typeof language !== 'string' || language.length !== 2) {
+                        console.error('❌ Language validation failed:', { 
+                            language, 
+                            type: typeof language, 
+                            length: language ? language.length : 'undefined' 
+                        });
+                        throw new Error('The language code must consist of two characters');
+                    }
+
+                    if (!/^[a-z]{2}$/.test(language)) {
+                        console.error('❌ Language format validation failed:', language);
+                        const customInput = document.getElementById('upload-book-language-custom');
+                        if (customInput && customInput.style.display !== 'none') {
+                            customInput.focus();
+                        }
+                        throw new Error('The language code must consist of two Latin letters in lower case');
+                    }
+
+                    if (file.size > 50 * 1024 * 1024) {
+                        throw new Error('The file size should not exceed 50MB');
+                    }
+
+                    const allowedExtensions = ['.pdf', '.epub', '.html', '.txt'];
+                    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        throw new Error(`Unsupported file format. Allowed: ${allowedExtensions.join(', ')}`);
+                    }
+
+                    console.log('✅ All validation passed, starting upload...');
+
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const btnText = document.getElementById('upload-btn-text');
+                    const loader = document.getElementById('upload-loader');
+                    
+                    if (submitBtn && btnText && loader) {
+                        this.setUploadLoading(submitBtn, loader, btnText, true);
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('title', title);
+                    formData.append('language', language); 
+                    
+                    if (author) {
+                        formData.append('author', author);
+                    }
+
+                    console.log('📡 Sending upload request with language:', language);
+                    this.showMessage('⏳ Uploading a file...', 'info');
+                    
+                    const result = await this.api.uploadFile('/files/upload-book', formData);
+                    
+                    console.log('✅ Upload successful:', result);
+                    this.showMessage('✅ The file was successfully uploaded!', 'success');
+                    
+                    form.reset();
+                    
+                    const customInput = document.getElementById('upload-book-language-custom');
+                    if (customInput) {
+                        customInput.style.display = 'none';
+                        customInput.removeAttribute('required');
+                        customInput.style.borderColor = '';
+                    }
+                    
+                    await this.loadOverviewData();
+                    if (document.getElementById('library-tab').classList.contains('active')) {
+                        await this.loadLibraryData();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Upload error:', error);
+                    this.showMessage('❌ Loading error: ' + error.message, 'error');
                 } finally {
+                    const form = document.getElementById('upload-book-form');
+                    const submitBtn = form?.querySelector('button[type="submit"]');
+                    const btnText = document.getElementById('upload-btn-text');
+                    const loader = document.getElementById('upload-loader');
+                    
+                    if (submitBtn && btnText && loader) {
+                        this.setUploadLoading(submitBtn, loader, btnText, false);
+                    }
+                    
                     if (window.currentUpload === uploadKey) {
                         window.currentUpload = null;
+                        console.log('🧹 Upload key cleared:', uploadKey);
                     }
                 }
             }
-
             getLanguageFromForm() {
-                const selectValue = document.getElementById('upload-book-language')?.value;
-                const customValue = document.getElementById('upload-book-language-custom')?.value;
+                const languageSelect = document.getElementById('upload-book-language');
+                const customLanguageInput = document.getElementById('upload-book-language-custom');
                 
-                if (selectValue && selectValue !== 'custom') {
-                    return selectValue;
-                } else if (selectValue === 'custom' && customValue && customValue.length === 2) {
-                    return customValue.toLowerCase();
+                console.log('🔍 Getting language from form...');
+                console.log('Language select element:', languageSelect);
+                console.log('Custom input element:', customLanguageInput);
+                
+                if (!languageSelect) {
+                    console.error('❌ Language select not found');
+                    return null;
                 }
                 
+                const selectValue = languageSelect.value;
+                const customValue = customLanguageInput ? customLanguageInput.value.trim() : '';
+                
+                console.log('📋 Form values:', { 
+                    selectValue, 
+                    customValue,
+                    selectValueType: typeof selectValue,
+                    customValueType: typeof customValue 
+                });
+                
+                if (selectValue && selectValue !== 'custom' && selectValue !== '') {
+                    console.log('✅ Using standard language:', selectValue);
+                    return selectValue;
+                } 
+                else if (selectValue === 'custom' && customValue && customValue.length === 2) {
+                    const normalizedValue = customValue.toLowerCase();
+                    console.log('✅ Using custom language:', normalizedValue);
+                    
+                    if (!/^[a-z]{2}$/.test(normalizedValue)) {
+                        console.error('❌ Invalid custom language format:', normalizedValue);
+                        return null;
+                    }
+                    
+                    return normalizedValue;
+                }
+                
+                console.error('❌ No valid language found');
                 return null;
-            }
-
+            }            
             setUploadLoading(button, loader, text, isLoading) {
                 if (isLoading) {
                     button.disabled = true;
@@ -1425,21 +1658,6 @@
             document.getElementById('edit-book-form').reset();
         }
 
-        function validateLanguageInput(input) {
-            let value = input.value.toLowerCase().replace(/[^a-z]/g, '');
-            if (value.length > 2) {
-                value = value.substring(0, 2);
-            }
-            input.value = value;
-            
-            const isValid = value.length === 2;
-            if (value.length > 0 && !isValid) {
-                input.style.borderColor = '#f44336';
-            } else {
-                input.style.borderColor = '';
-            }
-        }
-
         let profile;
         let profileInitialized = false;
 
@@ -1478,7 +1696,7 @@
                 
                 if (!customLanguageInput.dataset.listenerAttached) {
                     customLanguageInput.addEventListener('input', (e) => {
-                        validateLanguageInput(e.target);
+                        UserProfile.validateLanguageInput(e.target);
                     });
                     
                     customLanguageInput.addEventListener('focus', () => {

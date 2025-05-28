@@ -267,7 +267,7 @@ class OwnLibAPI {
         language = language.trim().toLowerCase();
         
         if (!/^[a-z]{2}$/.test(language)) {
-            throw new Error('The language code must consist of two lowercase Latin letters (for example: en, uk, pl, ru)');
+            throw new Error('');
         }
         
         return language;
