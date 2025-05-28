@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - OwnLib</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .faq-header {
+            background: linear-gradient(135deg, var(--primary-color), #6b7bff);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .faq-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .faq-search {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+        }
+
+        .faq-search input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .faq-search input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(75, 107, 251, 0.1);
+        }
+
+        .faq-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .faq-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .faq-section-title {
+            background: var(--secondary-color);
+            padding: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            background: #f8f9fa;
+        }
+
+        .faq-question.active {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        .faq-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-color);
+            line-height: 1.6;
+            display: none;
+        }
+
+        .faq-answer.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--light-text-color);
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .back-to-home {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-to-home .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .faq-header h1 {
+                font-size: 2rem;
+            }
+
+            .faq-categories {
+                grid-template-columns: 1fr;
+            }
+
+            .faq-question {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+
+            .faq-answer {
+                padding: 0 1rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/static/index.html" class="navbar-brand">📚 OwnLib</a>
+            <div class="navbar-nav">
+                <div id="auth-nav" class="d-none">
+                    <a href="/static/index.html" class="nav-link">Main Page</a>
+                    <a href="/static/catalog.html" class="nav-link">📖 Catalogue</a>
+                    <a href="/static/profile.html" class="nav-link">👤 My Profile</a>
+                    <span id="user-greeting">Hi, <strong id="username"></strong>!</span>
+                    <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+                <div id="guest-nav">
+                    <a href="/static/index.html" class="nav-link">Main Page</a>
+                    <button class="btn btn-secondary" id="login-btn">Sign in</button>
+                    <button class="btn" id="register-btn">Sign up</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="faq-container">
+        <div class="faq-header">
+            <h1>❓ Frequently Asked Questions</h1>
+            <p>Find answers to common questions about OwnLib</p>
+        </div>
+
+        <div class="faq-search">
+            <input type="text" id="faq-search-input" placeholder="🔍 Search for answers...">
+        </div>
+
+        <div class="faq-categories">
+            <button class="category-btn active" data-category="all">All Questions</button>
+            <button class="category-btn" data-category="general">General</button>
+            <button class="category-btn" data-category="account">Account</button>
+            <button class="category-btn" data-category="books">Books & Library</button>
+            <button class="category-btn" data-category="technical">Technical</button>
+        </div>
+
+        <div id="faq-content">
+            <div class="faq-section" data-category="general">
+                <div class="faq-section-title">🌟 General Questions</div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What is OwnLib?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        OwnLib is a personal digital library management system that helps you organize, track, and manage your book collection. You can upload your own books, discover free books from Project Gutenberg, track reading progress, and maintain detailed reading statistics.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is OwnLib free to use?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, OwnLib is completely free to use. You can create an account, upload books, and access all features without any cost.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do I need to install any software?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        No, OwnLib is a web-based application that runs entirely in your browser. Simply visit our website and create an account to get started.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-section" data-category="account">
+                <div class="faq-section-title">👤 Account & Registration</div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I create an account?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Click the "Sign Up" button on the homepage, fill in your username, email, and password, then click "Sign Up" to create your account.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I change my username or email later?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, you can update your username and email address in your profile settings at any time.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>I forgot my password. How can I reset it?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Click "Forgot your password?" on the login page, enter your email address, and follow the instructions to set a new password.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Why can't I log in?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Make sure you're using the correct email and password. If you still can't log in, try resetting your password or contact support.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-section" data-category="books">
+                <div class="faq-section-title">📚 Books & Library Management</div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What book formats are supported?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        OwnLib supports PDF, EPUB, HTML, and TXT file formats for uploaded books.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What's the maximum file size for uploads?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        You can upload book files up to 50MB in size.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I add books to my library?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        You can add books in two ways: 1) Upload your own files through Profile → Settings → Book Upload, or 2) Search and add books from our Project Gutenberg catalog.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I organize my books by status?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, you can set book statuses as "Want to read", "Reading", "Read", or "Dropped" to organize your library.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I delete a book from my library?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Go to your library, find the book you want to remove, and click the delete button. For uploaded files, this will also remove the file from our servers.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I download my uploaded books?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, you can download any books you've uploaded by clicking the download button in your library.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I track my reading progress?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        You can manually update your bookmark position for any book in your library. Go to the book details or edit the book in your library to set your current page.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I see my reading statistics?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, visit your profile to see detailed statistics including total reading time, pages read, books completed, and reading activity charts.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What is Project Gutenberg?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Project Gutenberg is a digital library of over 70,000 free ebooks, including classic literature, historical documents, and public domain works.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Are Project Gutenberg books really free?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, all books in Project Gutenberg are in the public domain and completely free to read, download, and share.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Can I backup my library?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, you can export your entire library as a JSON file from Profile → Settings → Backups. This includes all your books, reading progress, and statistics.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>How do I import books from a backup?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Go to Profile → Settings → Backups, select your JSON backup file, and click Import. Note that this will replace your current library.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-section" data-category="technical">
+                <div class="faq-section-title">⚙️ Technical Issues</div>
+                
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>The website is loading slowly. What should I do?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        OwnLib uses free hosting, which may occasionally experience slower response times. Try refreshing the page or waiting a few moments before trying again.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>I'm getting a database connection error. What does this mean?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        This is usually a temporary issue with our free database hosting. Please wait a few seconds and try again. The error typically resolves itself quickly.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>My uploaded file won't process. What's wrong?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Make sure your file is in a supported format (PDF, EPUB, HTML, TXT) and under 50MB. Also ensure the file isn't corrupted and try uploading again.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Does OwnLib work on mobile devices?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes, OwnLib is responsive and works on smartphones and tablets through your mobile browser.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is there a mobile app?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Currently, OwnLib is a web application only. There's no dedicated mobile app, but the website works well on mobile browsers.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Is my data secure?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        We take data security seriously. Your passwords are encrypted, and your personal information is protected according to standard security practices.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Do you share my reading data with anyone?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        No, we do not share your personal reading data, library contents, or statistics with any third parties.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>What languages are supported?</span>
+                        <span class="faq-icon">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        The OwnLib interface is currently available in English. However, you can upload and organize books in any language using standard two-letter language codes.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-results" class="no-results" style="display: none;">
+            <h3>🔍 No results found</h3>
+            <p>Try different search terms or browse all questions.</p>
+        </div>
+
+        <div class="back-to-home">
+            <a href="/static/index.html" class="btn">← Back to Home</a>
+        </div>
+    </div>
+
+    <div id="messages-container" class="messages-container"></div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        class FAQPage {
+            constructor() {
+                this.api = new OwnLibAPI();
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                await this.checkAuth();
+                this.setupEventListeners();
+            }
+
+            async checkAuth() {
+                try {
+                    if (this.api.token) {
+                        this.currentUser = await this.api.getCurrentUser();
+                        this.updateAuthUI(true);
+                    } else {
+                        this.updateAuthUI(false);
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    this.api.clearToken();
+                    this.updateAuthUI(false);
+                }
+            }
+
+            updateAuthUI(isAuthenticated) {
+                const authNav = document.getElementById('auth-nav');
+                const guestNav = document.getElementById('guest-nav');
+
+                if (isAuthenticated) {
+                    authNav.classList.remove('d-none');
+                    guestNav.classList.add('d-none');
+                    
+                    if (this.currentUser) {
+                        document.getElementById('username').textContent = this.currentUser.username;
+                    }
+                } else {
+                    authNav.classList.add('d-none');
+                    guestNav.classList.remove('d-none');
+                }
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.faq-question').forEach(question => {
+                    question.addEventListener('click', () => {
+                        this.toggleQuestion(question);
+                    });
+                });
+
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.filterByCategory(btn.dataset.category);
+                        this.updateActiveCategory(btn);
+                    });
+                });
+
+                const searchInput = document.getElementById('faq-search-input');
+                searchInput.addEventListener('input', () => {
+                    this.searchFAQ(searchInput.value);
+                });
+
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                const logoutBtn = document.getElementById('logout-btn');
+
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', () => {
+                        window.location.href = '/static/index.html#login';
+                    });
+                }
+
+                if (registerBtn) {
+                    registerBtn.addEventListener('click', () => {
+                        window.location.href = '/static/index.html#register';
+                    });
+                }
+
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.api.clearToken();
+                        this.currentUser = null;
+                        this.updateAuthUI(false);
+                        this.showMessage('You have been logged out', 'info');
+                    });
+                }
+            }
+
+            toggleQuestion(questionBtn) {
+                const answer = questionBtn.nextElementSibling;
+                const isActive = questionBtn.classList.contains('active');
+
+                if (isActive) {
+                    questionBtn.classList.remove('active');
+                    answer.classList.remove('active');
+                } else {
+                    questionBtn.classList.add('active');
+                    answer.classList.add('active');
+                }
+            }
+
+            updateActiveCategory(activeBtn) {
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                activeBtn.classList.add('active');
+            }
+
+            filterByCategory(category) {
+                const sections = document.querySelectorAll('.faq-section');
+                const noResults = document.getElementById('no-results');
+                let visibleSections = 0;
+
+                sections.forEach(section => {
+                    if (category === 'all' || section.dataset.category === category) {
+                        section.style.display = 'block';
+                        visibleSections++;
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+
+                if (visibleSections === 0) {
+                    noResults.style.display = 'block';
+                } else {
+                    noResults.style.display = 'none';
+                }
+
+                document.getElementById('faq-search-input').value = '';
+            }
+
+            searchFAQ(searchTerm) {
+                const sections = document.querySelectorAll('.faq-section');
+                const items = document.querySelectorAll('.faq-item');
+                const noResults = document.getElementById('no-results');
+                let visibleItems = 0;
+
+                if (!searchTerm.trim()) {
+                    sections.forEach(section => section.style.display = 'block');
+                    items.forEach(item => item.style.display = 'block');
+                    noResults.style.display = 'none';
+                    return;
+                }
+
+                const searchLower = searchTerm.toLowerCase();
+
+                sections.forEach(section => {
+                    let sectionHasVisible = false;
+                    const sectionItems = section.querySelectorAll('.faq-item');
+
+                    sectionItems.forEach(item => {
+                        const question = item.querySelector('.faq-question span').textContent.toLowerCase();
+                        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+
+                        if (question.includes(searchLower) || answer.includes(searchLower)) {
+                            item.style.display = 'block';
+                            sectionHasVisible = true;
+                            visibleItems++;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    section.style.display = sectionHasVisible ? 'block' : 'none';
+                });
+
+                if (visibleItems === 0) {
+                    noResults.style.display = 'block';
+                } else {
+                    noResults.style.display = 'none';
+                }
+
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector('[data-category="all"]').classList.add('active');
+            }
+
+            showMessage(message, type = 'info') {
+                let container = document.getElementById('messages-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'messages-container';
+                    container.className = 'messages-container';
+                    document.body.appendChild(container);
+                }
+
+                const messageEl = document.createElement('div');
+                messageEl.className = `alert alert-${type}`;
+                messageEl.textContent = message;
+
+                container.appendChild(messageEl);
+
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        let faqPage;
+        document.addEventListener('DOMContentLoaded', () => {
+            faqPage = new FAQPage();
+        });
+    </script>
+</body>
+</html>

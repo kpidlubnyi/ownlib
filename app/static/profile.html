@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - OwnLib</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/static/index.html" class="navbar-brand">📚 OwnLib</a>
+            <div class="navbar-nav">
+                <a href="/static/index.html" class="nav-link">Main Page</a>
+                <a href="/static/catalog.html" class="nav-link">📖 Catalogue</a>
+                <a href="/static/profile.html" class="nav-link active">👤 My Profile</a>
+                <span id="user-greeting">Hi, <strong id="username"></strong>!</span>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar">
+            </div>
+            <h1 class="profile-name" id="profile-name">Loading...</h1>
+            <p class="profile-email" id="profile-email">...</p>
+            <p class="profile-join-date" id="profile-join-date">With us since ...</p>
+        </div>
+
+        <div class="profile-nav">
+            <div class="profile-nav-tabs">
+                <button class="profile-nav-tab active" data-tab="overview">
+                    📊 Overview
+                </button>
+                <button class="profile-nav-tab" data-tab="library">
+                    📚 My Library
+                </button>
+                <button class="profile-nav-tab" data-tab="stats">
+                    📈 Statistics
+                </button>
+                <button class="profile-nav-tab" data-tab="settings">
+                    ⚙️ Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-content active" id="overview-tab">
+            <div class="stats-overview" id="stats-overview">
+            </div>
+            
+            <div class="card">
+                <div class="card-header">📖 Recently added</div>
+                <div class="card-body">
+                    <div id="recent-books" class="library-books">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="library-tab">
+            <div class="library-section">
+                <div class="library-header">
+                    <h2>📚 My Library(<span id="library-count">0</span> books)</h2>
+                    <div class="library-controls">
+                        <input type="text" id="library-search" class="library-search" placeholder="🔍 Search by...">
+                        <select id="library-filter" class="library-filter">
+                            <option value="">All statuses</option>
+                            <option value="Want to read">🎯 Want to read</option>
+                            <option value="reading">📖 Reading</option>
+                            <option value="read">✅ Read</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+                        <select id="library-sort" class="library-filter">
+                            <option value="added_at-desc">Firstly new</option>
+                            <option value="added_at-asc">Firstly old</option>
+                            <option value="title-asc">Name ↑</option>
+                            <option value="title-desc">Name ↓</option>
+                            <option value="author-asc">Author ↑</option>
+                            <option value="author-desc">Author ↓</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="library-books" class="library-books">
+                </div>
+                
+                <div id="library-pagination" class="pagination">
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="stats-tab">
+            <div class="stats-section">
+                <div class="card-header">📈 Detailed reading statistics</div>
+                
+                <div class="stats-charts">
+                    <div class="chart-container">
+                        <div class="chart-title">📊 Distribution of books by statuses</div>
+                        <canvas id="status-chart" width="300" height="300"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-title">🌍 Distribution of books by language</div>
+                        <canvas id="language-chart" width="300" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <div class="stats-charts" style="margin-top: 2rem;">
+                    <div class="chart-container">
+                        <div class="chart-title">📅 Activity in the last 30 days</div>
+                        <canvas id="activity-chart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">🎯 Recent activity</div>
+                    <div class="card-body">
+                        <div id="user-activities" class="reading-activity">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="settings-tab">
+            <div class="card">
+                <div class="card-header">⚙️ Profile Settings</div>
+                <div class="card-body">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="edit-username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="edit-email" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn">💾 Save changes</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">📤 Book downloading</div>
+                <div class="card-body">
+                    <h4>📱 Add a book from your device</h4>
+                    <p>Download your own books in PDF, EPUB, HTML or TXT formats from your device</p>
+                    
+                    <form id="upload-book-form" class="upload-section" data-submitting="false" style="margin-bottom: 2rem;">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+                            <h4>Add a book from your device</h4>
+                            <p style="color: var(--light-text-color); margin-bottom: 1rem;">
+                                Drag and drop your file here or click to select
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">📁 Book file</label>
+                                    <input type="file" id="upload-book-file" name="file" class="form-control" 
+                                        accept=".pdf,.epub,.html,.txt" required>
+                                    <small style="color: var(--light-text-color); font-size: 0.8rem;">
+                                        Supported formats: PDF, EPUB, HTML, TXT (макс. 50MB)
+                                    </small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">🌍 Language of book <span style="color: red;">*</span></label>
+                                    <select id="upload-book-language" name="language" class="form-control" required>
+                                        <option value="">Choose book language</option>
+                                        <option value="uk">🇺🇦 Українська (uk)</option>
+                                        <option value="en">🇺🇸 English (en)</option>
+                                        <option value="ru">🇷🇺 Русский (ru)</option>
+                                        <option value="pl">🇵🇱 Polski (pl)</option>
+                                        <option value="de">🇩🇪 Deutsch (de)</option>
+                                        <option value="fr">🇫🇷 Français (fr)</option>
+                                        <option value="es">🇪🇸 Español (es)</option>
+                                        <option value="it">🇮🇹 Italiano (it)</option>
+                                        <option value="custom">✏️ Another Language (enter code manually)</option>
+                                    </select>
+                                    <small style="color: var(--light-text-color); font-size: 0.8rem;">
+                                        Select a language from the list or enter your own two-character language code
+                                    </small>
+                                    <input type="text" id="upload-book-language-custom" name="language_custom" 
+                                        class="form-control" placeholder="Код мови (2 літери, наприклад: ja, ko, ar)" 
+                                        style="margin-top: 0.5rem; display: none;" maxlength="2" pattern="[a-z]{2}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">📖 Book title <span style="color: red;">*</span></label>
+                                    <input type="text" id="upload-book-title" name="title" class="form-control" 
+                                        placeholder="Enter the title of the book" required>
+                                    <small style="color: var(--light-text-color); font-size: 0.8rem;">
+                                        Specify the title of the book for better library organisation
+                                    </small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">✍️ Author (optionally)</label>
+                                    <input type="text" id="upload-book-author" name="author" class="form-control" 
+                                        placeholder="Automatically from a file">
+                                    <small style="color: var(--light-text-color); font-size: 0.8rem;">
+                                        If not specified, we will try to extract from the file metadata
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn" style="padding: 0.75rem 2rem;">
+                                <span id="upload-btn-text">📤 Download book</span>
+                                <div id="upload-loader" class="d-none" style="display: inline-block; margin-left: 10px;">
+                                    <div style="width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div style="background: #e8f4fd; padding: 1rem; border-radius: 8px; border-left: 4px solid #2196f3; margin-bottom: 1rem;">
+                        <p style="margin: 0; font-size: 0.9rem; color: #1565c0;">
+                            <strong>💡 Tip:</strong> The language code should consist of two lowercase Latin letters in accordance with ISO 639-1. 
+                            This will help you to better organise your library and improve the search for books by language.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">💾 Backups</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>📤 Exporting a library</h4>
+                            <p>Download a backup copy of your library in JSON format</p>
+                            <button id="export-library" class="btn">📤 Export</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>📥 Importing a library</h4>
+                            <p>Restore a library from a backup file</p>
+                            <input type="file" id="import-file" accept=".json" class="form-control" style="margin-bottom: 1rem;">
+                            <button id="import-library" class="btn btn-secondary">📥 Import</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-book-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edit-book-title">Edit book</h2>
+                <button class="close-btn" onclick="hideEditBookModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-book-form">
+                    <input type="hidden" id="edit-user-book-id" value="">
+                    <div class="form-group">
+                        <label class="form-label">📚 Status</label>
+                        <select id="edit-book-status" class="form-control" required>
+                            <option value="Want to read">🎯 Want to read</option>
+                            <option value="reading">📖 Reading</option>
+                            <option value="read">✅ Read</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📖 Bookmark (page number)</label>
+                        <input type="number" id="edit-bookmark-position" class="form-control" 
+                               min="0" placeholder="0" value="0">
+                    </div>
+                    <button type="submit" class="btn w-100">
+                        💾 Save changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="messages-container" class="messages-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        class UserProfile {
+            constructor() {
+                this.api = window.GuardedOwnLibAPI ? new GuardedOwnLibAPI() : new OwnLibAPI();
+                this.currentUser = null;
+                this.libraryPage = 1;
+                this.libraryFilters = {
+                    search: '',
+                    status: '',
+                    sort_by: 'added_at',
+                    sort_order: 'desc'
+                };
+                this.isInitialized = false;
+                this.isInitializing = false;
+                
+                console.log('🛡️ UserProfile: Using protected API:', this.api.constructor.name);
+            }
+
+            async init() {
+                if (this.isInitialized || this.isInitializing) {
+                    console.log('UserProfile is already initialised or is being initialised');
+                    return;
+                }
+                
+                this.isInitializing = true;
+                console.log('🔧 UserProfile init...');
+                
+                try {
+                    await this.checkAuth();
+                    this.setupEventListeners();
+                    await this.loadProfileData();
+                    this.handleUrlHash();
+                    this.isInitialized = true;
+                    console.log('✅ UserProfile is ready');
+                } catch (error) {
+                    console.error('❌ UserProfile initialisation error:', error);
+                } finally {
+                    this.isInitializing = false;
+                }
+            }
+
+            async checkAuth() {
+                try {
+                    if (this.api.token) {
+                        this.currentUser = await this.api.getCurrentUser();
+                        document.getElementById('username').textContent = this.currentUser.username;
+                    } else {
+                        window.location.href = '/static/index.html';
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    window.location.href = '/static/index.html';
+                }
+            }
+
+            setupEventListeners() {
+                if (this.listenersAttached) {
+                    console.log('Event listeners already added');
+                    return;
+                }
+
+                document.querySelectorAll('.profile-nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tabId = e.target.dataset.tab;
+                        this.switchTab(tabId);
+                    });
+                });
+
+                document.getElementById('library-search').addEventListener('input', 
+                    this.debounce(() => this.handleLibrarySearch(), 500));
+                
+                document.getElementById('library-filter').addEventListener('change', () => {
+                    this.handleLibraryFilter();
+                });
+                
+                document.getElementById('library-sort').addEventListener('change', () => {
+                    this.handleLibrarySort();
+                });
+
+                const profileForm = document.getElementById('profile-form');
+                const editBookForm = document.getElementById('edit-book-form');
+                const uploadForm = document.getElementById('upload-book-form');
+
+                if (profileForm && !profileForm.dataset.listenerAttached) {
+                    profileForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleProfileUpdate();
+                    });
+                    profileForm.dataset.listenerAttached = 'true';
+                }
+
+                if (editBookForm && !editBookForm.dataset.listenerAttached) {
+                    editBookForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleBookUpdate();
+                    });
+                    editBookForm.dataset.listenerAttached = 'true';
+                }
+
+                if (uploadForm && !uploadForm.dataset.listenerAttached) {
+                    uploadForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleBookUpload();
+                    });
+                    uploadForm.dataset.listenerAttached = 'true';
+                }
+
+                const exportBtn = document.getElementById('export-library');
+                const importBtn = document.getElementById('import-library');
+
+                if (exportBtn && !exportBtn.dataset.listenerAttached) {
+                    exportBtn.addEventListener('click', () => this.exportLibrary());
+                    exportBtn.dataset.listenerAttached = 'true';
+                }
+
+                if (importBtn && !importBtn.dataset.listenerAttached) {
+                    importBtn.addEventListener('click', () => this.importLibrary());
+                    importBtn.dataset.listenerAttached = 'true';
+                }
+
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn && !logoutBtn.dataset.listenerAttached) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.api.clearToken();
+                        window.location.href = '/static/index.html';
+                    });
+                    logoutBtn.dataset.listenerAttached = 'true';
+                }
+
+                document.getElementById('edit-book-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'edit-book-modal') {
+                        hideEditBookModal();
+                    }
+                });
+
+                this.setupDragAndDrop();
+                if (uploadForm && !uploadForm.dataset.listenerAttached) {
+                    uploadForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        console.log('📤 Upload form submitted');
+                        this.handleBookUpload();
+                    });
+                    uploadForm.dataset.listenerAttached = 'true';
+                    console.log('✅ Upload form listener attached');
+                }
+
+                this.listenersAttached = true;
+                console.log('✅ Event listeners installed with protection');
+            }
+
+            setupDragAndDrop() {
+                const fileInput = document.getElementById('upload-book-file');
+                const form = document.getElementById('upload-book-form');
+                
+                if (!fileInput || !form) return;
+                
+                fileInput.addEventListener('change', (e) => {
+                    this.handleFileSelect(e.target.files[0]);
+                });
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    form.addEventListener(eventName, this.preventDefaults, false);
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    form.addEventListener(eventName, () => {
+                        form.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    form.addEventListener(eventName, () => {
+                        form.classList.remove('dragover');
+                    }, false);
+                });
+
+                form.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        this.handleFileSelect(files[0]);
+                    }
+                }, false);
+            }
+
+            preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            handleFileSelect(file) {
+                if (!file) return;
+
+                const fileName = file.name;
+                const fileSize = this.formatFileSize(file.size);
+                
+                const titleInput = document.getElementById('upload-book-title');
+                if (!titleInput.value.trim()) {
+                    const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+                    titleInput.value = nameWithoutExt;
+                }
+
+                this.showMessage(`File "${fileName}" (${fileSize}) ready to download`, 'info');
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            handleUrlHash() {
+                const hash = window.location.hash.substring(1);
+                const validTabs = ['overview', 'library', 'stats', 'settings'];
+                
+                if (validTabs.includes(hash)) {
+                    this.switchTab(hash);
+                } else {
+                    this.switchTab('overview');
+                }
+                
+                window.addEventListener('hashchange', () => {
+                    this.handleUrlHash();
+                });
+            }
+
+            switchTab(tabId) {
+                history.replaceState(null, '', `#${tabId}`);
+                
+                document.querySelectorAll('.profile-nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+
+                this.loadTabData(tabId);
+            }
+
+            async loadTabData(tabId) {
+                try {
+                    switch(tabId) {
+                        case 'overview':
+                            await this.loadOverviewData();
+                            break;
+                        case 'library':
+                            await this.loadLibraryData();
+                            break;
+                        case 'stats':
+                            await this.loadStatsData();
+                            break;
+                        case 'settings':
+                            this.loadSettingsData();
+                            break;
+                    }
+                } catch (error) {
+                    console.error(`Error loading data for tab ${tabId}:`, error);
+                    this.showMessage(`Data loading error: ${error.message}`, 'error');
+                }
+            }
+
+            async loadProfileData() {
+                if (!this.currentUser) return;
+                
+                const user = this.currentUser;
+                
+                const initials = user.username.substring(0, 2).toUpperCase();
+                document.getElementById('profile-avatar').textContent = initials;
+                document.getElementById('profile-name').textContent = user.username;
+                document.getElementById('profile-email').textContent = user.email;
+                
+                const joinDate = new Date(user.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                document.getElementById('profile-join-date').textContent = `With us since ${joinDate}`;
+
+                await this.loadOverviewData();
+            }
+
+            async loadOverviewData() {
+                try {
+                    const [stats, libraryStats] = await Promise.all([
+                        this.api.getReadingStats(),
+                        this.api.get(`/library/${this.currentUser.username}/books/stats`)
+                    ]);
+                    
+                    this.displayStatsOverview(stats);
+                    this.displayRecentBooks(libraryStats.recent_additions);
+                } catch (error) {
+                    console.error('Error loading overview data:', error);
+                    this.showMessage(`Error loading review: ${error.message}`, 'error');
+                }
+            }
+
+            async loadLibraryData() {
+                try {
+                    const params = {
+                        skip: (this.libraryPage - 1) * 20,
+                        limit: 20,
+                        ...this.libraryFilters
+                    };
+
+                    Object.keys(params).forEach(key => {
+                        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+                            delete params[key];
+                        }
+                    });
+
+                    const response = await this.api.get(`/library/${this.currentUser.username}/books/`, params);
+                    this.displayLibraryBooks(response);
+                    this.displayLibraryPagination(response);
+                    
+                    document.getElementById('library-count').textContent = response.total;
+                } catch (error) {
+                    console.error('Error loading library data:', error);
+                    this.showMessage('Library loading error: ' + error.message, 'error');
+                }
+            }
+
+            async loadStatsData() {
+                try {
+                    console.log('Loading stats data...');
+                    
+                    const [stats, languageStats, activities] = await Promise.all([
+                        this.api.getReadingStats(),
+                        this.api.get('/stats/languages').catch(e => ({})),
+                        this.api.get('/stats/activities').catch(e => ({ daily_activities: [], recent_activities: [] }))
+                    ]);
+                    
+                    this.displayDetailedStats(stats);
+                    this.displayLanguageStats(languageStats);
+                    this.displayActivityStats(activities);
+                    
+                } catch (error) {
+                    console.error('Error loading stats data:', error);
+                    this.showMessage('Error loading statistics: ' + error.message, 'error');
+                }
+            }
+
+            loadSettingsData() {
+                if (this.currentUser) {
+                    document.getElementById('edit-username').value = this.currentUser.username;
+                    document.getElementById('edit-email').value = this.currentUser.email;
+                }
+            }
+
+            displayStatsOverview(stats) {
+                const container = document.getElementById('stats-overview');
+                
+                const statsCards = [
+                    {
+                        icon: '📚',
+                        value: stats.reading_now + stats.completed_books + stats.want_to_read + (stats.dropped_books || 0),
+                        label: 'Total books',
+                        description: 'In your collection'
+                    },
+                    {
+                        icon: '📖',
+                        value: stats.reading_now,
+                        label: 'Reading now',
+                        description: 'Active books'
+                    },
+                    {
+                        icon: '✅',
+                        value: stats.completed_books,
+                        label: 'Read',
+                        description: 'Completed books'
+                    },
+                    {
+                        icon: '📄',
+                        value: stats.total_pages_read,
+                        label: 'Pages',
+                        description: 'Total reads'
+                    }
+                ];
+
+                container.innerHTML = statsCards.map(stat => `
+                    <div class="stat-card">
+                        <div class="stat-icon">${stat.icon}</div>
+                        <div class="stat-value">${stat.value}</div>
+                        <div class="stat-label">${stat.label}</div>
+                        <div class="stat-description">${stat.description}</div>
+                    </div>
+                `).join('');
+            }
+
+            displayRecentBooks(recentBooks) {
+                const container = document.getElementById('recent-books');
+                
+                if (!recentBooks || recentBooks.length === 0) {
+                    container.innerHTML = '<div class="empty-state">📚 No recently added books yet</div>';
+                    return;
+                }
+
+                container.innerHTML = recentBooks.slice(0, 6).map(book => `
+                    <div class="library-book-card">
+                        <div class="book-cover-container" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer;">
+                            ${book.cover_url ? 
+                                `<img src="${book.cover_url}" alt="${book.title}" class="book-cover">` :
+                                `<div class="book-cover-placeholder">${book.title.charAt(0).toUpperCase()}</div>`
+                            }
+                            <div class="book-status-badge status-${book.status.toLowerCase().replace(' ', '-')}">
+                                ${this.getStatusText(book.status)}
+                            </div>
+                        </div>
+                        <div class="book-details">
+                            <h3 class="book-title" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer; color: var(--primary-color);">${book.title}</h3>
+                            <p class="book-author">${book.author || 'Unknown author'}</p>
+                            
+                            <div class="book-meta">
+                                Added: ${new Date(book.added_at).toLocaleDateString('en-US')}
+                            </div>
+                            
+                            <div class="book-actions">
+                                <button class="btn btn-sm" onclick="window.location.href='/static/book-detail.html?id=${book.id}'">
+                                    👁️ Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            displayLibraryBooks(response) {
+                const container = document.getElementById('library-books');
+                
+                if (response.books.length === 0) {
+                    container.innerHTML = '<div class="empty-state">📚 Your library is empty. <a href="/static/catalog.html">Add books from the catalogue</a></div>';
+                    return;
+                }
+
+                container.innerHTML = response.books.map(book => this.createLibraryBookCard(book)).join('');
+            }
+
+            createLibraryBookCard(userBook) {
+                const book = userBook.book;
+                const progress = userBook.bookmark_position || 0;
+                
+                return `
+                    <div class="library-book-card">
+                        <div class="book-cover-container" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer;">
+                            ${book.cover_url ? 
+                                `<img src="${book.cover_url}" alt="${book.title}" class="book-cover">` :
+                                `<div class="book-cover-placeholder">${book.title.charAt(0).toUpperCase()}</div>`
+                            }
+                            <div class="book-status-badge status-${userBook.status.toLowerCase().replace(' ', '-')}">
+                                ${this.getStatusText(userBook.status)}
+                            </div>
+                            ${userBook.is_local ? '<div class="local-badge">💾 Local</div>' : ''}
+                        </div>
+                        <div class="book-details">
+                            <h3 class="book-title" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer; color: var(--primary-color);">${book.title}</h3>
+                            <p class="book-author">${book.author || 'Unknown author'}</p>
+                            
+                            ${progress > 0 ? `
+                                <div class="book-bookmark">
+                                    <span style="background: var(--secondary-color); color: var(--primary-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 500;">
+                                        📖 Page ${progress}
+                                    </span>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="book-meta">
+                                Added: ${new Date(userBook.added_at).toLocaleDateString('en-US')}
+                                ${book.language ? ` • Language: ${book.language.toUpperCase()}` : ''}
+                            </div>
+                            
+                            <div class="book-actions">
+                                <button class="btn btn-sm" onclick="window.location.href='/static/book-detail.html?id=${book.id}'">
+                                    👁️ Details
+                                </button>
+                                ${this.createBookActionButton(userBook)}
+                                <button class="btn btn-secondary btn-sm" onclick="profile.showEditBookModal(${userBook.id}, '${book.title.replace(/'/g, "\\'")}', '${userBook.status}', ${progress})">
+                                    ✏️ Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            createBookActionButton(userBook) {
+                if (userBook.is_local && userBook.file_path) {
+                    return `
+                        <button class="btn btn-secondary btn-sm" onclick="profile.downloadLocalBook('${userBook.file_path}', '${userBook.book.title}')">
+                            📥 Download
+                        </button>
+                    `;
+                }
+                else if (userBook.book.gutenberg_id) {
+                    return `
+                        <button class="btn btn-secondary btn-sm" onclick="profile.openGutenbergBook(${userBook.book.gutenberg_id})">
+                            🌐 Read on Gutenberg
+                        </button>
+                    `;
+                }
+                else {
+                    return `
+                        <button class="btn btn-secondary btn-sm" onclick="profile.showMessage('File is not available for download', 'info')">
+                            📄 View
+                        </button>
+                    `;
+                }
+            }
+
+            downloadLocalBook(filePath, bookTitle) {
+                const link = document.createElement('a');
+                link.href = `/uploads/${filePath}`;
+                link.download = bookTitle;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.showMessage('Downloading started', 'info');
+            }
+
+            openGutenbergBook(gutenbergId) {
+                window.open(`https://www.gutenberg.org/ebooks/${gutenbergId}`, '_blank');
+            }
+
+            displayLibraryPagination(response) {
+                const container = document.getElementById('library-pagination');
+                
+                if (response.pages <= 1) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'flex';
+                
+                let paginationHTML = '';
+                
+                paginationHTML += `
+                    <button class="pagination-btn" ${!response.has_prev ? 'disabled' : ''} 
+                            onclick="profile.goToLibraryPage(${this.libraryPage - 1})">
+                        ← Попередня
+                    </button>
+                `;
+
+                const startPage = Math.max(1, this.libraryPage - 2);
+                const endPage = Math.min(response.pages, this.libraryPage + 2);
+
+                if (startPage > 1) {
+                    paginationHTML += `<button class="pagination-btn" onclick="profile.goToLibraryPage(1)">1</button>`;
+                    if (startPage > 2) {
+                        paginationHTML += `<span style="padding: 0.5rem;">...</span>`;
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += `
+                        <button class="pagination-btn ${i === this.libraryPage ? 'active' : ''}" 
+                                onclick="profile.goToLibraryPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                if (endPage < response.pages) {
+                    if (endPage < response.pages - 1) {
+                        paginationHTML += `<span style="padding: 0.5rem;">...</span>`;
+                    }
+                    paginationHTML += `<button class="pagination-btn" onclick="profile.goToLibraryPage(${response.pages})">${response.pages}</button>`;
+                }
+
+                paginationHTML += `
+                    <button class="pagination-btn" ${!response.has_next ? 'disabled' : ''} 
+                            onclick="profile.goToLibraryPage(${this.libraryPage + 1})">
+                        Наступна →
+                    </button>
+                `;
+
+                container.innerHTML = paginationHTML;
+            }
+
+            displayDetailedStats(stats) {
+                const statusCtx = document.getElementById('status-chart');
+                if (!statusCtx) return;
+                
+                const ctx = statusCtx.getContext('2d');
+                
+                if (this.statusChart) {
+                    this.statusChart.destroy();
+                }
+                
+                const statusData = [
+                    { label: 'Want to read', value: stats.want_to_read || 0, color: '#ff9800' },
+                    { label: 'Reading', value: stats.reading_now || 0, color: '#2196f3' },
+                    { label: 'Read', value: stats.completed_books || 0, color: '#4caf50' },
+                    { label: 'Dropped', value: stats.dropped_books || 0, color: '#f44336' }
+                ];
+                
+                const filteredData = statusData.filter(item => item.value > 0);
+                
+                if (filteredData.length === 0) {
+                    filteredData.push({ label: 'No books', value: 1, color: '#e0e0e0' });
+                }
+                
+                this.statusChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: filteredData.map(item => item.label),
+                        datasets: [{
+                            data: filteredData.map(item => item.value),
+                            backgroundColor: filteredData.map(item => item.color),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20, font: { size: 14 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            displayLanguageStats(languageStats) {
+                const languageCtx = document.getElementById('language-chart');
+                if (!languageCtx) return;
+                
+                const ctx = languageCtx.getContext('2d');
+                
+                if (this.languageChart) {
+                    this.languageChart.destroy();
+                }
+                
+                const labels = Object.keys(languageStats).map(lang => lang ? lang.toUpperCase() : 'Unknown');
+                const data = Object.values(languageStats);
+                
+                const colors = [
+                    '#4b6bfb', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731',
+                    '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff', '#48dbfb'
+                ];
+                
+                this.languageChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 20, font: { size: 14 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            displayActivityStats(activities) {
+                const activityCtx = document.getElementById('activity-chart');
+                if (!activityCtx) return;
+                
+                const ctx = activityCtx.getContext('2d');
+                
+                if (this.activityChart) {
+                    this.activityChart.destroy();
+                }
+                
+                const dailyData = activities.daily_activities || [];
+                const labels = dailyData.map(item => {
+                    const date = new Date(item.date);
+                    return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
+                });
+                const data = dailyData.map(item => item.count);
+                
+                this.activityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Activity',
+                            data: data,
+                            borderColor: '#4b6bfb',
+                            backgroundColor: 'rgba(75, 107, 251, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#4b6bfb',
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }
+                });
+                
+                this.displayUserActivities(activities.recent_activities || []);
+            }
+
+            displayUserActivities(activities) {
+                const container = document.getElementById('user-activities');
+                
+                if (activities.length === 0) {
+                    container.innerHTML = '<div class="empty-state">📅 No recent activity</div>';
+                    return;
+                }
+                
+                const activityIcons = {
+                    'book_added': '➕', 'book_removed': '🗑️', 'book_status_changed': '✏️',
+                    'book_uploaded': '📤', 'reading_session': '📖', 'bookmark_updated': '📑',
+                    'data_exported': '💾', 'data_imported': '📥', 'profile_updated': '👤',
+                    'gutenberg_imported': '🌐'
+                };
+                
+                const activityTexts = {
+                    'book_added': 'Book added', 'book_removed': 'Book deleted',
+                    'book_status_changed': 'Book status changed', 'book_uploaded': 'Book uploaded',
+                    'reading_session': 'Reading session', 'bookmark_updated': 'Bookmark has been updated',
+                    'data_exported': 'Exported data', 'data_imported': 'Imported data',
+                    'profile_updated': 'Profile updated', 'gutenberg_imported': 'Imported from Gutenberg'
+                };
+                
+                container.innerHTML = activities.map(activity => {
+                    const icon = activityIcons[activity.activity_type] || '📌';
+                    const text = activityTexts[activity.activity_type] || activity.activity_type;
+                    const details = activity.details || {};
+                    
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-date">${new Date(activity.created_at).toLocaleDateString('en-US')}</div>
+                            <div class="activity-text">
+                                ${icon} ${text}
+                                ${details.book_title ? `: "${details.book_title}"` : ''}
+                                ${details.status ? ` (${this.getStatusText(details.status)})` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            handleLibrarySearch() {
+                this.libraryFilters.search = document.getElementById('library-search').value;
+                this.libraryPage = 1;
+                if (document.getElementById('library-tab').classList.contains('active')) {
+                    this.loadLibraryData();
+                }
+            }
+
+            handleLibraryFilter() {
+                this.libraryFilters.status = document.getElementById('library-filter').value;
+                this.libraryPage = 1;
+                this.loadLibraryData();
+            }
+
+            handleLibrarySort() {
+                const sortValue = document.getElementById('library-sort').value;
+                const [sort_by, sort_order] = sortValue.split('-');
+                this.libraryFilters.sort_by = sort_by;
+                this.libraryFilters.sort_order = sort_order;
+                this.libraryPage = 1;
+                this.loadLibraryData();
+            }
+
+            goToLibraryPage(page) {
+                this.libraryPage = page;
+                this.loadLibraryData();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            showEditBookModal(userBookId, bookTitle, status, progress) {
+                document.getElementById('edit-user-book-id').value = userBookId;
+                document.getElementById('edit-book-status').value = status;
+                document.getElementById('edit-bookmark-position').value = progress || 0;
+                document.getElementById('edit-book-title').textContent = `Edit "${bookTitle}"`;
+                document.getElementById('edit-book-modal').classList.add('show');
+            }
+
+            async handleBookUpdate() {
+                const userBookId = document.getElementById('edit-user-book-id').value;
+                const status = document.getElementById('edit-book-status').value;
+                const bookmarkPosition = parseInt(document.getElementById('edit-bookmark-position').value) || 0;
+
+                try {
+                    await this.api.put(`/library/${this.currentUser.username}/books/${userBookId}`, {
+                        status: status,
+                        bookmark_position: bookmarkPosition
+                    });
+
+                    this.showMessage('The book has been successfully updated!', 'success');
+                    hideEditBookModal();
+                    
+                    if (document.getElementById('library-tab').classList.contains('active')) {
+                        await this.loadLibraryData();
+                    } else if (document.getElementById('overview-tab').classList.contains('active')) {
+                        await this.loadOverviewData();
+                    }
+                } catch (error) {
+                    this.showMessage('Error updating a book: ' + error.message, 'error');
+                }
+            }
+
+            async handleBookUpload() {
+                const uploadKey = `upload_${Date.now()}_${Math.random()}`;
+                
+                if (window.currentUpload) {
+                    console.log('🛑 Another upload in progress, blocked!');
+                    this.showMessage('Please wait, the preview is not yet complete', 'warning');
+                    return;
+                }
+                
+                window.currentUpload = uploadKey;
+                
+                try {
+                    
+                } finally {
+                    if (window.currentUpload === uploadKey) {
+                        window.currentUpload = null;
+                    }
+                }
+            }
+
+            getLanguageFromForm() {
+                const selectValue = document.getElementById('upload-book-language')?.value;
+                const customValue = document.getElementById('upload-book-language-custom')?.value;
+                
+                if (selectValue && selectValue !== 'custom') {
+                    return selectValue;
+                } else if (selectValue === 'custom' && customValue && customValue.length === 2) {
+                    return customValue.toLowerCase();
+                }
+                
+                return null;
+            }
+
+            setUploadLoading(button, loader, text, isLoading) {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.style.pointerEvents = 'none';
+                    button.style.opacity = '0.6';
+                    loader.classList.remove('d-none');
+                    text.textContent = '📤 Loading...';
+                    
+                    const form = button.closest('form');
+                    if (form) {
+                        form.style.pointerEvents = 'none';
+                        form.dataset.uploading = 'true';
+                    }
+                } else {
+                    button.disabled = false;
+                    button.style.pointerEvents = '';
+                    button.style.opacity = '';
+                    loader.classList.add('d-none');
+                    text.textContent = '📤 Download the book';
+                    
+                    const form = button.closest('form');
+                    if (form) {
+                        form.style.pointerEvents = '';
+                        form.dataset.uploading = 'false';
+                    }
+                }
+            }
+
+            async handleProfileUpdate() {
+                const username = document.getElementById('edit-username').value;
+                const email = document.getElementById('edit-email').value;
+
+                if (!username || !email) {
+                    this.showMessage('Fill in all fields', 'error');
+                    return;
+                }
+
+                try {
+                    await this.api.put('/users/me', { username: username, email: email });
+                    this.showMessage('Profile successfully updated!', 'success');
+                    
+                    this.currentUser.username = username;
+                    this.currentUser.email = email;
+                    document.getElementById('username').textContent = username;
+                    document.getElementById('profile-name').textContent = username;
+                    document.getElementById('profile-email').textContent = email;
+                } catch (error) {
+                    this.showMessage('Profile update error: ' + error.message, 'error');
+                }
+            }
+
+            async exportLibrary() {
+                try {
+                    const allBooks = [];
+                    let page = 1;
+                    let hasMore = true;
+
+                    while (hasMore) {
+                        const response = await this.api.get(`/library/${this.currentUser.username}/books/`, {
+                            skip: (page - 1) * 100,
+                            limit: 100
+                        });
+
+                        allBooks.push(...response.books);
+                        hasMore = response.has_next;
+                        page++;
+                    }
+
+                    const stats = await this.api.getReadingStats();
+
+                    const exportData = {
+                        export_date: new Date().toISOString(),
+                        user: {
+                            username: this.currentUser.username,
+                            email: this.currentUser.email
+                        },
+                        statistics: stats,
+                        books: allBooks
+                    };
+
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                        type: 'application/json'
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ownlib_backup_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    await this.api.post('/stats/log-activity', {
+                        activity_type: 'data_exported',
+                        details: {
+                            books_count: allBooks.length,
+                            export_date: new Date().toISOString()
+                        }
+                    });
+
+                    this.showMessage('Export completed successfully!', 'success');
+                } catch (error) {
+                    this.showMessage('Export error: ' + error.message, 'error');
+                }
+            }
+
+            async importLibrary() {
+                const fileInput = document.getElementById('import-file');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    this.showMessage('Select the file to import', 'error');
+                    return;
+                }
+
+                if (!file.name.endsWith('.json')) {
+                    this.showMessage('The file must be in JSON format', 'error');
+                    return;
+                }
+
+                try {
+                    const text = await file.text();
+                    const importData = JSON.parse(text);
+
+                    if (!importData.books || !Array.isArray(importData.books)) {
+                        throw new Error('Incorrect file format: missing book array');
+                    }
+
+                    const booksCount = importData.books.length;
+                    
+                    const confirmed = confirm(
+                        `⚠️ WARNING: This will result in a COMPLETE DELETION of all your current books and replace them with data from the file.\n\n` +
+                        `📊 Import statistics:\n` +
+                        `• The file contains: ${booksCount} books\n` +
+                        `• Your current library will be COMPLETELY CLEANED\n` +
+                        `• All reading progress data will be LOST\n\n` +
+                        `❓ Are you sure you want to continue?`
+                    );
+
+                    if (!confirmed) {
+                        this.showMessage('Import cancelled by user', 'info');
+                        return;
+                    }
+
+                    this.showMessage('⏳ Start importing a library...', 'info');
+                    
+                    const importBtn = document.getElementById('import-library');
+                    const originalText = importBtn.textContent;
+                    importBtn.disabled = true;
+                    importBtn.innerHTML = '⏳ Importing...';
+
+                    try {
+                        const result = await this.api.importLibrary(file);
+                        
+                        const stats = result.statistics;
+                        let successMessage = `✅ Import completed successfully!\n\n📊 Stats:\n`;
+                        successMessage += `• Total books in the file: ${stats.total_books}\n`;
+                        successMessage += `• Successfully imported: ${stats.imported_books}\n`;
+                        successMessage += `• New books created: ${stats.created_books}\n`;
+                        
+                        if (stats.skipped_books > 0) {
+                            successMessage += `• Skipped: ${stats.skipped_books}\n`;
+                        }
+                        
+                        if (stats.errors && stats.errors.length > 0) {
+                            successMessage += `\n⚠️ Warning:\n`;
+                            const errorsToShow = stats.errors.slice(0, 3);
+                            errorsToShow.forEach(error => {
+                                successMessage += `• ${error}\n`;
+                            });
+                            if (stats.errors.length > 3) {
+                                successMessage += `• ... and ${stats.errors.length - 3} else warnings`;
+                            }
+                        }
+
+                        this.showMessage(successMessage, 'success');
+                        fileInput.value = '';
+                        
+                        await this.loadOverviewData();
+                        if (document.getElementById('library-tab').classList.contains('active')) {
+                            await this.loadLibraryData();
+                        }
+                        if (document.getElementById('stats-tab').classList.contains('active')) {
+                            await this.loadStatsData();
+                        }
+
+                    } catch (apiError) {
+                        let errorMessage = 'Import error: ';
+                        if (apiError.message.includes('JSON')) {
+                            errorMessage += 'Incorrect format of the JSON file';
+                        } else if (apiError.message.includes('books')) {
+                            errorMessage += 'The file is missing data about books';
+                        } else if (apiError.message.includes('file format')) {
+                            errorMessage += 'Incorrect export file structure';
+                        } else {
+                            errorMessage += apiError.message;
+                        }
+                        
+                        this.showMessage(errorMessage, 'error');
+                    }
+
+                    importBtn.disabled = false;
+                    importBtn.textContent = originalText;
+
+                } catch (parseError) {
+                    let errorMessage = 'File reading error: ';
+                    if (parseError instanceof SyntaxError) {
+                        errorMessage += 'File contains invalid JSON';
+                    } else {
+                        errorMessage += parseError.message;
+                    }
+                    
+                    this.showMessage(errorMessage, 'error');
+                    
+                    const importBtn = document.getElementById('import-library');
+                    if (importBtn) {
+                        importBtn.disabled = false;
+                        importBtn.textContent = '📥 Import';
+                    }
+                }
+            }
+            
+            getStatusText(status) {
+                const statusMap = {
+                    'Want to read': '🎯',
+                    'reading': '📖',
+                    'read': '✅',
+                    'dropped': '❌'
+                };
+                return statusMap[status] || status;
+            }
+
+            showMessage(message, type = 'info') {
+                let container = document.getElementById('messages-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'messages-container';
+                    container.className = 'messages-container';
+                    document.body.appendChild(container);
+                }
+
+                const messageEl = document.createElement('div');
+                messageEl.className = `alert alert-${type}`;
+                
+                if (message.includes('\n')) {
+                    const lines = message.split('\n');
+                    lines.forEach((line, index) => {
+                        if (index > 0) {
+                            messageEl.appendChild(document.createElement('br'));
+                        }
+                        messageEl.appendChild(document.createTextNode(line));
+                    });
+                } else {
+                    messageEl.textContent = message;
+                }
+
+                container.appendChild(messageEl);
+
+                const timeoutDuration = type === 'success' ? 8000 : 
+                                       type === 'error' ? 10000 : 
+                                       5000;
+
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.remove();
+                    }
+                }, timeoutDuration);
+            }
+        }
+
+        function hideEditBookModal() {
+            document.getElementById('edit-book-modal').classList.remove('show');
+            document.getElementById('edit-book-form').reset();
+        }
+
+        function validateLanguageInput(input) {
+            let value = input.value.toLowerCase().replace(/[^a-z]/g, '');
+            if (value.length > 2) {
+                value = value.substring(0, 2);
+            }
+            input.value = value;
+            
+            const isValid = value.length === 2;
+            if (value.length > 0 && !isValid) {
+                input.style.borderColor = '#f44336';
+            } else {
+                input.style.borderColor = '';
+            }
+        }
+
+        let profile;
+        let profileInitialized = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (profileInitialized || profile) {
+                console.log('⚠️ UserProfile is already initialised');
+                return;
+            }
+            
+            profileInitialized = true;
+            console.log('🚀 Initialise UserProfile with protection...');
+            
+            profile = new UserProfile();
+            profile.init();
+            window.profile = profile;
+            
+            const languageSelect = document.getElementById('upload-book-language');
+            const customLanguageInput = document.getElementById('upload-book-language-custom');
+            
+            if (languageSelect && customLanguageInput) {
+                if (!languageSelect.dataset.listenerAttached) {
+                    languageSelect.addEventListener('change', (e) => {
+                        if (e.target.value === 'custom') {
+                            customLanguageInput.style.display = 'block';
+                            customLanguageInput.setAttribute('required', 'required');
+                            customLanguageInput.placeholder = 'Enter the language code (2 letters, for example: ja, ko, ar)';
+                            customLanguageInput.focus();
+                        } else {
+                            customLanguageInput.style.display = 'none';
+                            customLanguageInput.removeAttribute('required');
+                            customLanguageInput.value = '';
+                        }
+                    });
+                    languageSelect.dataset.listenerAttached = 'true';
+                }
+                
+                if (!customLanguageInput.dataset.listenerAttached) {
+                    customLanguageInput.addEventListener('input', (e) => {
+                        validateLanguageInput(e.target);
+                    });
+                    
+                    customLanguageInput.addEventListener('focus', () => {
+                        if (typeof profile !== 'undefined') {
+                            profile.showMessage('Enter the two-character language code (ISO 639-1), for example: ja for Japanese, ko for Korean', 'info');
+                        }
+                    });
+                    customLanguageInput.dataset.listenerAttached = 'true';
+                }
+            }
+            
+            const fileInput = document.getElementById('upload-book-file');
+            const titleInput = document.getElementById('upload-book-title');
+            
+            if (fileInput && titleInput && !fileInput.dataset.listenerAttached) {
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file && !titleInput.value.trim()) {
+                        let fileName = file.name.replace(/\.[^/.]+$/, '');
+                        fileName = fileName.replace(/[_-]/g, ' ');
+                        fileName = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+                        titleInput.value = fileName;
+                    }
+                });
+                fileInput.dataset.listenerAttached = 'true';
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            profileInitialized = false;
+            console.log('🔄 Page unloading, resetting profile flags');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('upload-book-form');
+            if (uploadForm) {
+                let isSubmitting = false;
+                let lastSubmitTime = 0;
+                
+                uploadForm.addEventListener('submit', function(e) {
+                    const now = Date.now();
+                    
+                    if (isSubmitting || (now - lastSubmitTime) < 1000) {
+                        console.log('🛑 BLOCKED: Form submit blocked by aggressive protection');
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                    
+                    isSubmitting = true;
+                    lastSubmitTime = now;
+                    
+                    console.log('✅ ALLOWED: Form submit allowed');
+                    
+                    setTimeout(() => {
+                        isSubmitting = false;
+                        console.log('🔄 RESET: Form protection reset');
+                    }, 10000);
+                }, true); 
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OwnLib - Your personal library</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="messages-container" class="messages-container"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand">📚 OwnLib</a>
+            <div class="navbar-nav">
+                <div id="auth-nav" class="d-none">
+                    <a href="/static/index.html" class="nav-link active">Main Page</a>
+                    <a href="/static/catalog.html" class="nav-link">📖 Catalogue</a>
+                    <a href="/static/profile.html" class="nav-link">👤 My Profile</a>
+                    <span id="user-greeting">Hi, <strong id="username"></strong>!</span>
+                    <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+                <div id="guest-nav">
+                    <button class="btn btn-secondary" id="login-btn">Sign in</button>
+                    <button class="btn" id="register-btn">Sign up</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="welcome-section" class="welcome-section">
+            <h1>Welcome to OwnLib</h1>
+            <p>Your personal digital library for organising and managing your book collection</p>
+            <button class="btn" id="start-btn" style="background: white; color: var(--primary-color); padding: 1rem 2rem; font-size: 1.1rem;">
+                Start using
+            </button>
+        </div>
+
+        <div id="main-content" class="d-none">
+            <div class="quick-actions">
+                <div class="quick-action-card" onclick="window.location.href='/static/catalog.html'">
+                    <div class="quick-action-icon">📖</div>
+                    <div class="quick-action-title">Catalogue of books</div>
+                    <div class="quick-action-desc">View all available books and find new ones</div>
+                </div>
+                <div class="quick-action-card" onclick="window.location.href='/static/profile.html#settings'">
+                    <div class="quick-action-icon">📤</div>
+                    <div class="quick-action-title">Download book</div>
+                    <div class="quick-action-desc">Add your own book to the library</div>
+                </div>
+                <div class="quick-action-card" onclick="window.location.href='/static/profile.html#library'">
+                    <div class="quick-action-icon">📚</div>
+                    <div class="quick-action-title">My Library</div>
+                    <div class="quick-action-desc">View and manage my books</div>
+                </div>
+                <div class="quick-action-card" onclick="window.location.href='/static/profile.html'">
+                    <div class="quick-action-icon">👤</div>
+                    <div class="quick-action-title">My Profile</div>
+                    <div class="quick-action-desc">View statistics and settings</div>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2 class="text-center" style="margin-bottom: 0.5rem;">🌟 OwnLib features</h2>
+                <p class="text-center" style="color: var(--light-text-color); margin-bottom: 2rem;">
+                    Everything you need to manage your personal library
+                </p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-title">Personal library</div>
+                        <div class="feature-desc">Organise your books by status: I want to read, I'm reading, read</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📥</div>
+                        <div class="feature-title">Uploading files</div>
+                        <div class="feature-desc">Add your own books in PDF, EPUB, HTML, TXT formats and upload them</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Reading statistics</div>
+                        <div class="feature-desc">Track your progress and analyse your reading habits</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-title">Search for books</div>
+                        <div class="feature-desc">Find free books from Project Gutenberg</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-title">Online access</div>
+                        <div class="feature-desc">Read books directly on Gutenberg sites or download files</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💾</div>
+                        <div class="feature-title">Data Export/Import</div>
+                        <div class="feature-desc">Keep backups of your library and import them</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    🚀 Fast start
+                </div>
+                <div class="card-body">
+                    <p style="margin-bottom: 1.5rem;">Here are a few steps to get started with OwnLib:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📖 Find books</h4>
+                            <p style="margin-bottom: 1rem;">Go to <a href="/static/catalog.html" style="color: var(--primary-color);">book catalog</a> and find the books you are interested in from the Project Gutenberg collection.</p>
+                            
+                            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📤 Upload your own books</h4>
+                            <p>Add your own books via <a href="/static/profile.html#settings" style="color: var(--primary-color);">profile settings</a>.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📚 Organise a library</h4>
+                            <p style="margin-bottom: 1rem;">Set statuses for books: "I want to read", "I'm reading", "Read"..</p>
+                            
+                            <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📊 Track your progress</h4>
+                            <p>View reading statistics in your profile and bookmark your reading.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-footer-section" style="margin-top: 3rem;">
+                <div class="card">
+                    <div class="card-body" style="text-align: center; padding: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">❓ Have Questions?</h3>
+                        <p style="margin-bottom: 1.5rem; color: var(--light-text-color);">
+                            Check out our comprehensive FAQ section for answers to common questions about OwnLib.
+                        </p>
+                        <a href="/static/faq.html" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            📖 View FAQ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+
+
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Вхід</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email" class="form-label">Email</label>
+                        <input type="email" id="login-email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password" class="form-label">Password</label>
+                        <input type="password" id="login-password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn w-100" id="login-submit">
+                        Sign in
+                    </button>
+                    <p class="text-center mt-3">
+                        Don't have account? <a href="#" id="switch-to-register">Sign up</a>
+                    </p>
+                    <p class="text-center mt-2">
+                        <a href="#" id="forgot-password-link" style="color: var(--light-text-color); font-size: 0.9rem;">Forgot your password?</a>
+                    </p>
+                </form>
+
+                <form id="register-form" class="d-none">
+                    <div class="form-group">
+                        <label for="register-username" class="form-label">Username</label>
+                        <input type="text" id="register-username" name="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email" class="form-label">Email</label>
+                        <input type="email" id="register-email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password" class="form-label">Password</label>
+                        <input type="password" id="register-password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn w-100" id="register-submit">
+                        Sign Up
+                    </button>
+                    <p class="text-center mt-3">
+                        Already have account? <a href="#" id="switch-to-login">Sign in</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔐 Password recovery</h2>
+                <button class="close-btn" id="close-forgot-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="forgot-password-form">
+                    <p style="margin-bottom: 1.5rem; color: var(--light-text-color);">
+                        Enter the email address associated with your account
+                    </p>
+                    <div class="form-group">
+                        <label for="forgot-email" class="form-label">Email</label>
+                        <input type="email" id="forgot-email" name="email" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn w-100" id="forgot-submit">
+                        🔍 Find account
+                    </button>
+                    <p class="text-center mt-3">
+                        <a href="#" id="back-to-login">← Back to login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="reset-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔑 New password</h2>
+                <button class="close-btn" id="close-reset-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="reset-password-form">
+                    <input type="hidden" id="reset-email" value="">
+                    <p style="margin-bottom: 1.5rem; color: var(--light-text-color);">
+                        Account found! Set a new password for your account.
+                    </p>
+                    <div class="form-group">
+                        <label for="new-password" class="form-label">New password</label>
+                        <input type="password" id="new-password" name="password" class="form-control" 
+                               minlength="8" required>
+                        <small style="color: var(--light-text-color);">Minimum 8 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password" class="form-label">Confirm password</label>
+                        <input type="password" id="confirm-password" name="confirmPassword" class="form-control" 
+                               minlength="8" required>
+                    </div>
+                    <button type="submit" class="btn w-100" id="reset-submit">
+                        🔑 Change password
+                    </button>
+                    <p class="text-center mt-3">
+                        <a href="#" id="back-to-forgot">← Back</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const checks = {
+                length: password.length >= 8,
+                lowercase: /[a-z]/.test(password),
+                uppercase: /[A-Z]/.test(password),
+                numbers: /\d/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+            
+            strength = Object.values(checks).filter(Boolean).length;
+            
+            if (strength <= 2) return 'weak';
+            if (strength <= 4) return 'medium';
+            return 'strong';
+        }
+
+        function updatePasswordStrength(inputId, strengthBarId) {
+            const passwordInput = document.getElementById(inputId);
+            const strengthBar = document.getElementById(strengthBarId);
+            
+            if (!passwordInput || !strengthBar) return;
+            
+            const password = passwordInput.value;
+            const strength = checkPasswordStrength(password);
+            
+            strengthBar.className = `password-strength ${strength}`;
+            
+            const strengthText = strengthBar.nextElementSibling;
+            if (strengthText && strengthText.classList.contains('strength-text')) {
+                const strengthLabels = {
+                    weak: '🔴 Слабкий',
+                    medium: '🟡 Середній', 
+                    strong: '🟢 Надійний'
+                };
+                strengthText.textContent = password ? strengthLabels[strength] : '';
+            }
+        }
+
+        function hideAllModals() {
+            document.getElementById('auth-modal').classList.remove('show');
+            document.getElementById('forgot-password-modal').classList.remove('show');
+            document.getElementById('reset-password-modal').classList.remove('show');
+        }
+
+        function showAuthModal(type) {
+            hideAllModals();
+            const modal = document.getElementById('auth-modal');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const modalTitle = document.getElementById('modal-title');
+
+            modal.classList.add('show');
+
+            if (type === 'login') {
+                modalTitle.textContent = '🔐 Login';
+                loginForm.classList.remove('d-none');
+                registerForm.classList.add('d-none');
+            } else {
+                modalTitle.textContent = '📝 Registration';
+                loginForm.classList.add('d-none');
+                registerForm.classList.remove('d-none');
+            }
+        }
+
+        function showForgotPasswordModal() {
+            hideAllModals();
+            document.getElementById('forgot-password-modal').classList.add('show');
+            document.getElementById('forgot-email').focus();
+        }
+
+        function showResetPasswordModal(email) {
+            hideAllModals();
+            document.getElementById('reset-email').value = email;
+            document.getElementById('reset-password-modal').classList.add('show');
+            document.getElementById('new-password').focus();
+        }
+
+        function showMessage(message, type = 'info') {
+            let container = document.getElementById('messages-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'messages-container';
+                container.className = 'messages-container';
+                document.body.appendChild(container);
+            }
+
+            const messageEl = document.createElement('div');
+            messageEl.className = `alert alert-${type}`;
+            messageEl.textContent = message;
+
+            container.appendChild(messageEl);
+
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.remove();
+                }
+            }, 5000);
+        }
+
+        class SimpleIndexApp {
+            constructor() {
+                this.api = new OwnLibAPI();
+                this.currentUser = null;
+            }
+
+            async init() {
+                console.log('SimpleIndexApp initialization...');
+                await this.checkAuth();
+                this.setupEventListeners();
+                console.log('SimpleIndexApp is ready!');
+            }
+
+            async checkAuth() {
+                try {
+                    if (this.api.token) {
+                        this.currentUser = await this.api.getCurrentUser();
+                        this.updateAuthUI(true);
+                    } else {
+                        this.updateAuthUI(false);
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    this.api.clearToken();
+                    this.updateAuthUI(false);
+                }
+            }
+
+            updateAuthUI(isAuthenticated) {
+                const authNav = document.getElementById('auth-nav');
+                const guestNav = document.getElementById('guest-nav');
+                const welcomeSection = document.getElementById('welcome-section');
+                const mainContent = document.getElementById('main-content');
+
+                if (isAuthenticated) {
+                    authNav.classList.remove('d-none');
+                    guestNav.classList.add('d-none');
+                    welcomeSection.classList.add('d-none');
+                    mainContent.classList.remove('d-none');
+                    
+                    if (this.currentUser) {
+                        document.getElementById('username').textContent = this.currentUser.username;
+                    }
+                } else {
+                    authNav.classList.add('d-none');
+                    guestNav.classList.remove('d-none');
+                    welcomeSection.classList.remove('d-none');
+                    mainContent.classList.add('d-none');
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('login-btn').addEventListener('click', () => showAuthModal('login'));
+                document.getElementById('register-btn').addEventListener('click', () => showAuthModal('register'));
+                document.getElementById('start-btn').addEventListener('click', () => showAuthModal('register'));
+                
+                document.getElementById('close-modal').addEventListener('click', hideAllModals);
+                document.getElementById('close-forgot-modal').addEventListener('click', hideAllModals);
+                document.getElementById('close-reset-modal').addEventListener('click', hideAllModals);
+
+                document.getElementById('switch-to-register').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showAuthModal('register');
+                });
+
+                document.getElementById('switch-to-login').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showAuthModal('login');
+                });
+
+                document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showForgotPasswordModal();
+                });
+
+                document.getElementById('back-to-login').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showAuthModal('login');
+                });
+
+                document.getElementById('back-to-forgot').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showForgotPasswordModal();
+                });
+
+                document.getElementById('login-form').addEventListener('submit', this.handleLogin.bind(this));
+                document.getElementById('register-form').addEventListener('submit', this.handleRegister.bind(this));
+                document.getElementById('forgot-password-form').addEventListener('submit', this.handleForgotPassword.bind(this));
+                document.getElementById('reset-password-form').addEventListener('submit', this.handleResetPassword.bind(this));
+                
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', this.handleLogout.bind(this));
+                }
+
+                ['auth-modal', 'forgot-password-modal', 'reset-password-modal'].forEach(modalId => {
+                    document.getElementById(modalId).addEventListener('click', (e) => {
+                        if (e.target.id === modalId) {
+                            hideAllModals();
+                        }
+                    });
+                });
+
+                console.log('✅ Event listeners have been added');
+            }
+
+            async handleLogin(event) {
+                event.preventDefault();
+                console.log('🔐 login...');
+                
+                const form = event.target;
+                const formData = new FormData(form);
+                const email = formData.get('email');
+                const password = formData.get('password');
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Login...';
+
+                try {
+                    await this.api.login(email, password);
+                    this.currentUser = await this.api.getCurrentUser();
+                    this.updateAuthUI(true);
+                    showMessage('Successful login!', 'success');
+                    hideAllModals();
+                    form.reset();
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            async handleRegister(event) {
+                event.preventDefault();
+                console.log('📝 register...');
+                
+                const form = event.target;
+                const formData = new FormData(form);
+                const userData = {
+                    username: formData.get('username'),
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                };
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Registration...';
+
+                try {
+                    const response = await this.api.register(userData);
+                    this.api.setToken(response.access_token);
+                    this.currentUser = await this.api.getCurrentUser();
+                    this.updateAuthUI(true);
+                    showMessage('Successful registration!', 'success');
+                    hideAllModals();
+                    form.reset();
+                } catch (error) {
+                    console.error('Register error:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            async handleForgotPassword(event) {
+                event.preventDefault();
+                console.log('🔍 Searching for account...');
+                
+                const form = event.target;
+                const formData = new FormData(form);
+                const email = formData.get('email');
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Searching...';
+
+                try {
+                    const response = await this.api.requestPasswordReset(email);
+                    showMessage('Account found!', 'success');
+                    showResetPasswordModal(email);
+                    form.reset();
+                } catch (error) {
+                    console.error('Forgot password error:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            async handleResetPassword(event) {
+                event.preventDefault();
+                console.log('🔑 Resetting password...');
+                
+                const form = event.target;
+                const formData = new FormData(form);
+                const email = document.getElementById('reset-email').value;
+                const newPassword = formData.get('password');
+                const confirmPassword = formData.get('confirmPassword');
+
+                if (newPassword !== confirmPassword) {
+                    showMessage('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (newPassword.length < 8) {
+                    showMessage('Password must contain at least 8 characters', 'error');
+                    return;
+                }
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Changing password...';
+
+                try {
+                    const response = await this.api.resetPassword(email, newPassword);
+                    showMessage('Password successfully changed! Now you can log in with your new password.', 'success');
+                    hideAllModals();
+                    form.reset();
+                    
+                    setTimeout(() => {
+                        showAuthModal('login');
+                    }, 2000);
+                } catch (error) {
+                    console.error('Reset password error:', error);
+                    showMessage(error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            handleLogout() {
+                console.log('🚪 logout...');
+                this.api.clearToken();
+                this.currentUser = null;
+                this.updateAuthUI(false);
+                showMessage('You have been logged out', 'info');
+            }
+        }
+
+        let simpleApp;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            simpleApp = new SimpleIndexApp();
+            simpleApp.init();
+            window.simpleApp = simpleApp;
+        });
+    </script>
+</body>
+</html>

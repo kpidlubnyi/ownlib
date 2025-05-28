@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details - OwnLib</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/static/index.html" class="navbar-brand">📚 OwnLib</a>
+            <div class="navbar-nav">
+                <a href="/static/index.html" class="nav-link">Main Page</a>
+                <a href="/static/catalog.html" class="nav-link">📖 Catalogue</a>
+                <a href="#" class="nav-link" id="profile-link">👤 My Profile</a>
+                <span id="user-greeting">Hi, <strong id="username"></strong>!</span>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="book-detail-container loading-overlay" id="book-detail-container">
+    </div>
+
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="status-modal-title">Edit book status</h2>
+                <button class="close-btn" onclick="hideStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="status-form">
+                    <div class="form-group">
+                        <label class="form-label">📚 Status</label>
+                        <select id="book-status" class="form-control" required>
+                            <option value="Want to read">🎯 Want to read</option>
+                            <option value="reading">📖 Reading</option>
+                            <option value="read">✅ Read</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📖 Bookmark (number of page)</label>
+                        <input type="number" id="bookmark-position" class="form-control" 
+                               min="0" placeholder="0" value="0">
+                    </div>
+                    <button type="submit" class="btn w-100">
+                        💾 Save changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-to-collection-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="add-modal-title">Add book to collection</h2>
+                <button class="close-btn" onclick="hideAddToCollectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-to-collection-form">
+                    <div class="form-group">
+                        <label class="form-label">📚 Status</label>
+                        <select id="add-book-status" class="form-control" required>
+                            <option value="Want to read">🎯 Want to read</option>
+                            <option value="reading">📖 Reading</option>
+                            <option value="read">✅ Read</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📖 Bookmark (number of page)</label>
+                        <input type="number" id="add-bookmark-position" class="form-control" 
+                               min="0" placeholder="0" value="0">
+                    </div>
+                    <button type="submit" class="btn w-100">
+                        ➕ Add to collection
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="messages-container" class="messages-container"></div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        class BookDetailPage {
+            constructor() {
+                this.api = new OwnLibAPI();
+                this.currentUser = null;
+                this.bookId = null;
+                this.bookData = null;
+                this.init();
+            }
+
+            async init() {
+                await this.checkAuth();
+                this.setupEventListeners();
+                this.parseURL();
+                await this.loadBookDetail();
+            }
+
+            async checkAuth() {
+                try {
+                    if (this.api.token) {
+                        this.currentUser = await this.api.getCurrentUser();
+                        document.getElementById('username').textContent = this.currentUser.username;
+                        document.getElementById('profile-link').href = `/static/profile.html`;
+                    } else {
+                        window.location.href = '/static/index.html';
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    window.location.href = '/static/index.html';
+                }
+            }
+
+            parseURL() {
+                const urlParams = new URLSearchParams(window.location.search);
+                this.bookId = urlParams.get('id');
+                
+                if (!this.bookId) {
+                    this.showMessage('ID of book not provided', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/static/catalog.html';
+                    }, 2000);
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.api.clearToken();
+                    window.location.href = '/static/index.html';
+                });
+
+                document.getElementById('status-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleUpdateStatus();
+                });
+
+                document.getElementById('add-to-collection-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleAddToCollection();
+                });
+
+                document.getElementById('status-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'status-modal') {
+                        hideStatusModal();
+                    }
+                });
+
+                document.getElementById('add-to-collection-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'add-to-collection-modal') {
+                        hideAddToCollectionModal();
+                    }
+                });
+            }
+
+            async loadBookDetail() {
+                this.showLoading(true);
+
+                try {
+                    const response = await this.api.get(`/books/${this.bookId}/detail`);
+                    this.bookData = response;
+                    this.displayBookDetail(response);
+                } catch (error) {
+                    console.error('Error loading book detail:', error);
+                    this.showMessage('Error loading book detail: ' + error.message, 'error');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/static/catalog.html';
+                    }, 2000);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            displayBookDetail(book) {
+                const container = document.getElementById('book-detail-container');
+                
+                const currentPage = book.bookmark_position || 0;
+
+                container.innerHTML = `
+                    <div class="book-detail-header">
+                        <div class="book-cover-section">
+                            ${book.cover_url ? 
+                                `<img src="${book.cover_url}" alt="${book.title}" class="book-cover-large">` :
+                                `<div class="book-cover-placeholder-large">${book.title.charAt(0).toUpperCase()}</div>`
+                            }
+                            ${book.is_local ? '<div class="meta-item"><div class="meta-label">Type</div><div class="meta-value">💾 Local book</div></div>' : ''}
+                        </div>
+                        
+                        <div class="book-info-section">
+                            <div>
+                                <h1 class="book-title-large">${book.title}</h1>
+                                <p class="book-author-large">${book.author || 'Unknown author'}</p>
+                                
+                                <div class="book-meta-info">
+                                    ${book.language ? `
+                                        <div class="meta-item">
+                                            <div class="meta-label">Language</div>
+                                            <div class="meta-value">🌍 ${book.language.toUpperCase()}</div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${book.gutenberg_id ? `
+                                        <div class="meta-item">
+                                            <div class="meta-label">Project Gutenberg</div>
+                                            <div class="meta-value">#${book.gutenberg_id}</div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <div class="meta-item">
+                                        <div class="meta-label">Formats</div>
+                                        <div class="meta-value">${book.available_formats.length || 0}</div>
+                                    </div>
+                                    
+                                    ${book.added_at ? `
+                                        <div class="meta-item">
+                                            <div class="meta-label">Added</div>
+                                            <div class="meta-value">${new Date(book.added_at).toLocaleDateString('en-US')}</div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="book-status-section">
+                        <h3>📚 Status in your library </h3>
+                        <div class="status-badge-large status-${book.in_collection ? book.user_status.toLowerCase().replace(' ', '-') : 'not-in-collection'}">
+                            ${book.in_collection ? this.getStatusText(book.user_status) : '📋 Not in collection'}
+                        </div>
+                        
+                        ${book.in_collection && currentPage > 0 ? `
+                            <div class="bookmark-section">
+                                <div class="meta-label">📖 Current position</div>
+                                <div class="bookmark-display">
+                                    📖 Page ${currentPage}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="book-actions-section">
+                            ${this.createActionButtons(book)}
+                        </div>
+                    </div>
+
+                    ${book.description ? `
+                        <div class="book-description-section">
+                            <h3>📝 Description </h3>
+                            <p>${book.description}</p>
+                        </div>
+                    ` : ''}
+
+                    ${book.formats && book.formats.length > 0 && !book.is_local ? `
+                        <div class="book-formats-section">
+                            <h3>📎 Available formats</h3>
+                            <div class="formats-grid">
+                                ${book.formats.map(format => `
+                                    <div class="format-item" onclick="bookDetail.openFormat('${format.format_type}', '${format.url}')">
+                                        <div class="format-icon">${this.getFormatIcon(format.format_type)}</div>
+                                        <div class="format-name">${format.format_type}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            createActionButtons(book) {
+                let buttons = '';
+
+                if (book.is_local && book.file_path) {
+                    buttons += `
+                        <button class="btn btn-large" onclick="bookDetail.downloadLocalBook('${book.file_path}', '${book.title}')">
+                            📥 Download file
+                        </button>
+                    `;
+                }
+                else if (book.gutenberg_id) {
+                    buttons += `
+                        <button class="btn btn-large" onclick="bookDetail.openGutenbergBook(${book.gutenberg_id})">
+                            🌐 Read on Gutenberg
+                        </button>
+                    `;
+                }
+
+                if (book.in_collection) {
+                    buttons += `
+                        <button class="btn btn-secondary btn-large" onclick="bookDetail.showStatusModal()">
+                            ✏️ Change status
+                        </button>
+                        <button class="btn btn-danger btn-large" onclick="bookDetail.removeFromCollection()">
+                            🗑️ Delete from collention
+                        </button>
+                    `;
+                } else {
+                    buttons += `
+                        <button class="btn btn-large" onclick="bookDetail.showAddToCollectionModal()">
+                            ➕ Add to collection
+                        </button>
+                    `;
+                }
+
+                buttons += `
+                    <button class="btn btn-secondary btn-large" onclick="bookDetail.goToLibrary()">
+                        📚 My Library
+                    </button>
+                `;
+
+                return buttons;
+            }
+
+            getStatusText(status) {
+                const statusMap = {
+                    'Want to read': '🎯 Want to read',
+                    'reading': '📖 Reading',
+                    'read': '✅ Read',
+                    'dropped': '❌ Dropped'
+                };
+                return statusMap[status] || status;
+            }
+
+            getFormatIcon(format) {
+                const icons = {
+                    'pdf': '📄',
+                    'epub': '📖',
+                    'html': '🌐',
+                    'text': '📝'
+                };
+                return icons[format] || '📎';
+            }
+
+            downloadLocalBook(filePath, bookTitle) {
+                const link = document.createElement('a');
+                link.href = `/uploads/${filePath}`;
+                link.download = bookTitle;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.showMessage('Downloading has been began', 'info');
+            }
+
+            openGutenbergBook(gutenbergId) {
+                window.open(`https://www.gutenberg.org/ebooks/${gutenbergId}`, '_blank');
+            }
+
+            showStatusModal() {
+                if (!this.bookData) return;
+                
+                document.getElementById('book-status').value = this.bookData.user_status;
+                document.getElementById('bookmark-position').value = this.bookData.bookmark_position || 0;
+                document.getElementById('status-modal').classList.add('show');
+            }
+
+            showAddToCollectionModal() {
+                document.getElementById('add-to-collection-modal').classList.add('show');
+            }
+
+            async handleUpdateStatus() {
+                const status = document.getElementById('book-status').value;
+                const bookmarkPosition = parseInt(document.getElementById('bookmark-position').value) || 0;
+
+                try {
+                    await this.api.put(`/library/${this.currentUser.username}/books/${this.bookData.user_book_id}`, {
+                        status: status,
+                        bookmark_position: bookmarkPosition
+                    });
+
+                    this.showMessage('Book status successfully changed!', 'success');
+                    hideStatusModal();
+                    
+                    await this.loadBookDetail();
+                } catch (error) {
+                    this.showMessage('Status changing error: ' + error.message, 'error');
+                }
+            }
+
+            async handleAddToCollection() {
+                const status = document.getElementById('add-book-status').value;
+                const bookmarkPosition = parseInt(document.getElementById('add-bookmark-position').value) || 0;
+
+                try {
+                    await this.api.addBookToCollection(this.bookId, {
+                        book_id: parseInt(this.bookId),
+                        status: status,
+                        bookmark_position: bookmarkPosition,
+                        is_local: false
+                    });
+
+                    this.showMessage('Book successfully has been added to collection!', 'success');
+                    hideAddToCollectionModal();
+                    
+                    await this.loadBookDetail();
+                } catch (error) {
+                    this.showMessage('Book adding error: ' + error.message, 'error');
+                }
+            }
+
+            async removeFromCollection() {
+                if (!confirm(`Are you sure you want to delete "${this.bookData.title}" from your collection?`)) {
+                    return;
+                }
+
+                try {
+                    await this.api.delete(`/library/${this.currentUser.username}/books/${this.bookData.user_book_id}`);
+                    this.showMessage('Book has been deleted from ', 'success');
+                    
+                    await this.loadBookDetail();
+                } catch (error) {
+                    this.showMessage('Book deliting error: ' + error.message, 'error');
+                }
+            }
+
+            openFormat(formatType, url) {
+                window.open(url, '_blank');
+            }
+
+            goToLibrary() {
+                window.location.href = `/static/profile.html#library`;
+            }
+
+            showLoading(show) {
+                const container = document.getElementById('book-detail-container');
+                if (show) {
+                    container.classList.add('loading');
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 4rem;">
+                            <div class="loading-spinner"></div>
+                            <p style="margin-top: 1rem;">Loading book description...</p>
+                        </div>
+                    `;
+                } else {
+                    container.classList.remove('loading');
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                let container = document.getElementById('messages-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'messages-container';
+                    container.className = 'messages-container';
+                    document.body.appendChild(container);
+                }
+
+                const messageEl = document.createElement('div');
+                messageEl.className = `alert alert-${type}`;
+                messageEl.textContent = message;
+
+                container.appendChild(messageEl);
+
+                setTimeout(() => {
+                    messageEl.remove();
+                }, 5000);
+            }
+        }
+
+        function hideStatusModal() {
+            document.getElementById('status-modal').classList.remove('show');
+            document.getElementById('status-form').reset();
+        }
+
+        function hideAddToCollectionModal() {
+            document.getElementById('add-to-collection-modal').classList.remove('show');
+            document.getElementById('add-to-collection-form').reset();
+        }
+
+        let bookDetail;
+        document.addEventListener('DOMContentLoaded', () => {
+            bookDetail = new BookDetailPage();
+        });
+    </script>
+</body>
+</html>

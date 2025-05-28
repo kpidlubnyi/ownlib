@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalogue - OwnLib</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/static/index.html" class="navbar-brand">📚 OwnLib</a>
+            <div class="navbar-nav">
+                <a href="/static/index.html" class="nav-link">Main Page</a>
+                <a href="/static/catalog.html" class="nav-link active">📖 Catalogue</a>
+                <a href="/static/profile.html" class="nav-link" id="profile-link">👤 My Profile</a>
+                <span id="user-greeting">Hi, <strong id="username"></strong>!</span>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="catalog-header">
+            <div class="container">
+                <h1 class="text-center" style="margin: 0; font-size: 2.5rem;">📖 Catalogue of books</h1>
+                <p class="text-center" style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.2rem;">
+                    Discover thousands of interesting books and organise your library
+                </p>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <div class="search-tabs">
+                <button class="search-tab active" data-tab="catalog">
+                    📚 Search in catalogue
+                </button>
+                <button class="search-tab" data-tab="gutenberg">
+                    🌐 Search in Project Gutenberg
+                </button>
+            </div>
+            
+            <div class="search-content">
+                <div id="catalog-search" class="search-filters active">
+                    <form id="catalog-filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">🔍 Search</label>
+                                <input type="text" 
+                                       id="catalog-search-input" 
+                                       class="search-input" 
+                                       placeholder="Book title, author or description...">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">🌍 Language</label>
+                                <select id="language-filter" class="filter-select">
+                                    <option value="">All languages</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">✍️ Author</label>
+                                <input type="text" 
+                                    id="author-filter" 
+                                    class="search-input"
+                                    placeholder="Enter name of author..."
+                                    list="authors-datalist">
+                                <datalist id="authors-datalist">
+                                </datalist>
+                            </div>                            <div class="filter-group">
+                                <button type="submit" class="btn" style="padding: 0.75rem 1.5rem;">
+                                    🔍 Пошук
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="gutenberg-search" class="search-filters">
+                    <form id="gutenberg-filters">
+                        <div class="gutenberg-search-row">
+                            <div class="filter-group">
+                                <label class="filter-label">🔍 Search in Project Gutenberg</label>
+                                <input type="text" 
+                                       id="gutenberg-search-input" 
+                                       class="search-input" 
+                                       placeholder="Book title or author...">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">🌍 Language</label>
+                                <select id="gutenberg-language-filter" class="filter-select">
+                                    <option value="">All languages</option>
+                                    <option value="en">English</option>
+                                    <option value="uk">Українська</option>
+                                    <option value="ru">Русский</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="es">Español</option>
+                                    <option value="it">Italiano</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <button type="submit" class="btn" style="padding: 0.75rem 1.5rem;">
+                                    🌐 Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="mt-3" style="background: #e8f4fd; padding: 1rem; border-radius: 8px; border-left: 4px solid #2196f3;">
+                        <p style="margin: 0; font-size: 0.9rem; color: #1565c0;">
+                            <strong>ℹ️ Project Gutenberg</strong> - is a collection of more than 70,000 free e-books. 
+                            Here you can find classic literature, historical documents, and much more.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="catalog-results loading-overlay" id="catalog-results">
+            <div class="results-header">
+                <div class="results-info" id="results-info">
+                    Loading...
+                </div>
+                <div class="sort-controls">
+                    <label for="sort-select" style="margin-right: 0.5rem;">Sort by:</label>
+                    <select id="sort-select" class="sort-select">
+                        <option value="title-asc">Title ↑</option>
+                        <option value="title-desc">Title ↓</option>
+                        <option value="author-asc">Author ↑</option>
+                        <option value="author-desc">Author ↓</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="books-grid" id="books-grid">
+            </div>
+            
+            <div class="pagination" id="pagination">
+            </div>
+        </div>
+    </div>
+
+    <div id="add-book-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="add-book-title">Add book to collection</h2>
+                <button class="close-btn" onclick="hideAddBookModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-book-form">
+                    <input type="hidden" id="selected-book-id" value="">
+                    <input type="hidden" id="selected-gutenberg-id" value="">
+                    <input type="hidden" id="is-gutenberg-book" value="false">
+                    <div class="form-group">
+                        <label class="form-label">📚 Status</label>
+                        <select id="book-status" class="form-control" required>
+                            <option value="Want to read">🎯 Want to read</option>
+                            <option value="reading">📖 Reading</option>
+                            <option value="read">✅ Read</option>
+                            <option value="dropped">❌ Dropped</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📖 Bookmark (page number)</label>
+                        <input type="number" id="bookmark-position" class="form-control" 
+                               min="0" placeholder="0" value="0">
+                    </div>
+                    <button type="submit" class="btn w-100">
+                        ➕ Add to collection
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="messages-container" class="messages-container"></div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        class BooksCatalog {
+            constructor() {
+                this.api = new OwnLibAPI();
+                this.currentUser = null;
+                this.currentPage = 1;
+                this.currentMode = 'catalog';
+                this.currentFilters = {
+                    search: '',
+                    language: '',
+                    author: '',
+                    sort_by: 'title',
+                    sort_order: 'asc'
+                };
+                this.gutenbergFilters = {
+                    search: '',
+                    language: ''
+                };
+                this.isLoading = false;
+                this.init();
+            }
+
+            async init() {
+                await this.checkAuth();
+                this.setupEventListeners();
+                await this.loadFilters();
+                await this.loadBooks();
+            }
+
+            async checkAuth() {
+                try {
+                    if (this.api.token) {
+                        this.currentUser = await this.api.getCurrentUser();
+                        document.getElementById('username').textContent = this.currentUser.username;
+                        
+                        document.getElementById('profile-link').href = `/static/profile.html`;
+                    } else {
+                        window.location.href = '/static/index.html';
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    window.location.href = '/static/index.html';
+                }
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.search-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.switchSearchMode(e.target.dataset.tab);
+                    });
+                });
+
+                document.getElementById('catalog-filters').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleCatalogSearch();
+                });
+
+                document.getElementById('gutenberg-filters').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleGutenbergSearch();
+                });
+
+                const authorFilter = document.getElementById('author-filter');
+                let authorTimeout;
+                
+                authorFilter.addEventListener('input', (e) => {
+                    clearTimeout(authorTimeout);
+                    const searchValue = e.target.value;
+                    
+                    authorTimeout = setTimeout(() => {
+                        this.loadAuthorsDatalist(searchValue);
+                    }, 300);
+                    
+                    if (searchValue === '') {
+                        this.currentFilters.author = '';
+                        this.currentPage = 1;
+                        if (this.currentMode === 'catalog') {
+                            this.loadBooks();
+                        }
+                    }
+                });
+                
+                authorFilter.addEventListener('change', () => {
+                    this.handleCatalogSearch();
+                });
+
+                document.getElementById('sort-select').addEventListener('change', (e) => {
+                    if (this.currentMode === 'catalog') {
+                        const [sort_by, sort_order] = e.target.value.split('-');
+                        this.currentFilters.sort_by = sort_by;
+                        this.currentFilters.sort_order = sort_order;
+                        this.currentPage = 1;
+                        this.loadBooks();
+                    }
+                });
+
+                document.getElementById('add-book-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleAddToCollection();
+                });
+
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.api.clearToken();
+                    window.location.href = '/static/index.html';
+                });
+
+                document.getElementById('add-book-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'add-book-modal') {
+                        hideAddBookModal();
+                    }
+                });
+            }
+
+            switchSearchMode(mode) {
+                this.currentMode = mode;
+                this.currentPage = 1;
+
+                document.querySelectorAll('.search-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${mode}"]`).classList.add('active');
+
+                document.querySelectorAll('.search-filters').forEach(filter => {
+                    filter.classList.remove('active');
+                });
+                document.getElementById(`${mode}-search`).classList.add('active');
+
+                const sortControls = document.querySelector('.sort-controls');
+                if (mode === 'catalog') {
+                    sortControls.style.display = 'flex';
+                } else {
+                    sortControls.style.display = 'none';
+                }
+
+                this.loadBooks();
+            }
+
+            async loadFilters() {
+                if (this.currentMode !== 'catalog') return;
+
+                try {
+                    const languages = await this.api.get('/books/languages');
+                    const languageSelect = document.getElementById('language-filter');
+                    languageSelect.innerHTML = '<option value="">All languages</option>';
+                    languages.forEach(lang => {
+                        const option = document.createElement('option');
+                        option.value = lang;
+                        option.textContent = lang.toUpperCase();
+                        languageSelect.appendChild(option);
+                    });
+
+                    await this.loadAuthorsDatalist();
+                } catch (error) {
+                    console.error('Error loading filters:', error);
+                }
+            }
+
+            async loadAuthorsDatalist(search = '') {
+                try {
+                    const params = { limit: 200 };
+                    if (search) {
+                        params.search = search;
+                    }
+                    
+                    const authors = await this.api.get('/books/authors', params);
+                    const datalist = document.getElementById('authors-datalist');
+                    datalist.innerHTML = '';
+                    
+                    authors.forEach(author => {
+                        const option = document.createElement('option');
+                        option.value = author;
+                        datalist.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading authors:', error);
+                }
+            }
+
+            handleCatalogSearch() {
+                this.currentFilters.search = document.getElementById('catalog-search-input').value;
+                this.currentFilters.language = document.getElementById('language-filter').value;
+                this.currentFilters.author = document.getElementById('author-filter').value;
+                this.currentPage = 1;
+                this.loadBooks();
+            }
+
+            handleGutenbergSearch() {
+                this.gutenbergFilters.search = document.getElementById('gutenberg-search-input').value;
+                this.gutenbergFilters.language = document.getElementById('gutenberg-language-filter').value;
+                this.currentPage = 1;
+                this.loadBooks();
+            }
+
+            async loadBooks() {
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showLoading(true);
+
+                try {
+                    let response;
+                    
+                    if (this.currentMode === 'catalog') {
+                        const params = {
+                            skip: (this.currentPage - 1) * 20,
+                            limit: 20,
+                            ...this.currentFilters
+                        };
+
+                        Object.keys(params).forEach(key => {
+                            if (params[key] === '' || params[key] === null || params[key] === undefined) {
+                                delete params[key];
+                            }
+                        });
+
+                        response = await this.api.get('/books/catalog', params);
+                        this.displayBooks(response);
+                        this.displayPagination(response);
+                        this.displayResultsInfo(response, 'catalog');
+                    } else {
+                        const params = {
+                            page: this.currentPage,
+                            limit: 20
+                        };
+
+                        if (this.gutenbergFilters.search) {
+                            params.query = this.gutenbergFilters.search;
+                        }
+
+                        if (this.gutenbergFilters.language) {
+                            params.languages = [this.gutenbergFilters.language];
+                        }
+
+                        response = await this.api.get('/books/search', params);
+                        this.displayGutenbergBooks(response);
+                        this.displayGutenbergPagination(response);
+                        this.displayResultsInfo(response, 'gutenberg');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error loading books:', error);
+                    this.showMessage('Error loading books: ' + error.message, 'error');
+                } finally {
+                    this.isLoading = false;
+                    this.showLoading(false);
+                }
+            }
+
+            displayBooks(response) {
+                const container = document.getElementById('books-grid');
+                
+                if (response.books.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                            <h3>📚 Book not found</h3>
+                            <p>Try changing your search criteria</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const booksHTML = response.books.map(book => this.createBookCard(book)).join('');
+                container.innerHTML = booksHTML;
+            }
+
+            displayGutenbergBooks(response) {
+                const container = document.getElementById('books-grid');
+                
+                if (response.results.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                            <h3>📚 Book not found</h3>
+                            <p>Try changing your search criteria in Project Gutenberg</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const booksHTML = response.results.map(book => this.createGutenbergBookCard(book)).join('');
+                container.innerHTML = booksHTML;
+            }
+
+            createBookCard(book) {
+                const hasFormats = book.formats && book.formats.length > 0;
+                const isInCollection = book.in_collection || false;
+                
+                return `
+                    <div class="catalog-book-card">
+                        <div class="book-cover-container" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer;">
+                            ${book.cover_url ? 
+                                `<img src="${book.cover_url}" alt="${book.title}" class="book-cover">` :
+                                `<div class="book-cover-placeholder">${book.title.charAt(0).toUpperCase()}</div>`
+                            }
+                            <div class="collection-status ${isInCollection ? 'status-in-collection' : 'status-not-in-collection'}">
+                                ${isInCollection ? '✅ In collection' : '➕ Add'}
+                            </div>
+                        </div>
+                        <div class="book-details">
+                            <h3 class="book-title" onclick="window.location.href='/static/book-detail.html?id=${book.id}'" style="cursor: pointer; color: var(--primary-color);">${book.title}</h3>
+                            <p class="book-author">${book.author || 'Unknown author'}</p>
+                            ${book.language ? `<span class="book-language">${book.language.toUpperCase()}</span>` : ''}
+                            <div class="book-actions">
+                                <button class="btn btn-sm" onclick="window.location.href='/static/book-detail.html?id=${book.id}'">
+                                    👁️ Details
+                                </button>
+                                ${isInCollection ? 
+                                    `<button class="btn btn-secondary btn-sm" onclick="catalog.viewInLibrary(${book.user_book_id})">
+                                        📚 In library
+                                    </button>` :
+                                    `<button class="btn btn-sm" onclick="catalog.showAddBookModal(${book.id}, '${book.title.replace(/'/g, "\\'")}', false)">
+                                        ➕ Add
+                                    </button>`
+                                }
+                                ${book.gutenberg_id ? `
+                                    <button class="btn btn-secondary btn-sm" onclick="catalog.openGutenbergBook(${book.gutenberg_id})">
+                                        🌐 Gutenberg
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            createGutenbergBookCard(book) {
+                return `
+                    <div class="catalog-book-card">
+                        <div class="book-cover-container" onclick="catalog.openGutenbergBook(${book.id})" style="cursor: pointer;">
+                            ${book.formats && book.formats['image/jpeg'] ? 
+                                `<img src="${book.formats['image/jpeg']}" alt="${book.title}" class="book-cover">` :
+                                `<div class="book-cover-placeholder">${book.title.charAt(0).toUpperCase()}</div>`
+                            }
+                            <div class="gutenberg-badge">🌐 Gutenberg</div>
+                            <div class="collection-status status-not-in-collection">
+                                ➕ Add
+                            </div>
+                        </div>
+                        <div class="book-details">
+                            <h3 class="book-title" onclick="catalog.openGutenbergBook(${book.id})" style="cursor: pointer; color: var(--primary-color);">${book.title}</h3>
+                            <p class="book-author">${book.authors ? book.authors.map(a => a.name).join(', ') : 'Unknown author'}</p>
+                            ${book.languages && book.languages.length > 0 ? `<span class="book-language">${book.languages.join(', ').toUpperCase()}</span>` : ''}
+                            <div class="book-actions">
+                                <button class="btn btn-sm" onclick="catalog.showAddBookModal(null, '${book.title.replace(/'/g, "\\'")}', true, ${book.id})">
+                                    ➕ Add to collection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            displayPagination(response) {
+                const container = document.getElementById('pagination');
+                
+                if (response.pages <= 1) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'flex';
+                this.renderPaginationButtons(container, response.pages, response.has_prev, response.has_next);
+            }
+
+            displayGutenbergPagination(response) {
+                const container = document.getElementById('pagination');
+                
+                const totalResults = response.count;
+                const perPage = 20;
+                const totalPages = Math.ceil(totalResults / perPage);
+                
+                if (totalPages <= 1) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'flex';
+                const hasPrev = this.currentPage > 1;
+                const hasNext = this.currentPage < totalPages;
+                this.renderPaginationButtons(container, totalPages, hasPrev, hasNext);
+            }
+
+            renderPaginationButtons(container, totalPages, hasPrev, hasNext) {
+                let paginationHTML = '';
+                
+                paginationHTML += `
+                    <button class="pagination-btn" ${!hasPrev ? 'disabled' : ''} 
+                            onclick="catalog.goToPage(${this.currentPage - 1})">
+                        ← Previous
+                    </button>
+                `;
+
+                const startPage = Math.max(1, this.currentPage - 2);
+                const endPage = Math.min(totalPages, this.currentPage + 2);
+
+                if (startPage > 1) {
+                    paginationHTML += `<button class="pagination-btn" onclick="catalog.goToPage(1)">1</button>`;
+                    if (startPage > 2) {
+                        paginationHTML += `<span style="padding: 0.5rem;">...</span>`;
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += `
+                        <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" 
+                                onclick="catalog.goToPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        paginationHTML += `<span style="padding: 0.5rem;">...</span>`;
+                    }
+                    paginationHTML += `<button class="pagination-btn" onclick="catalog.goToPage(${totalPages})">${totalPages}</button>`;
+                }
+
+                paginationHTML += `
+                    <button class="pagination-btn" ${!hasNext ? 'disabled' : ''} 
+                            onclick="catalog.goToPage(${this.currentPage + 1})">
+                        Next →
+                    </button>
+                `;
+
+                container.innerHTML = paginationHTML;
+            }
+
+            displayResultsInfo(response, mode) {
+                const container = document.getElementById('results-info');
+                
+                if (mode === 'catalog') {
+                    if (response.total === 0) {
+                        container.textContent = 'Nothing have found';
+                    } else {
+                        const start = (this.currentPage - 1) * 20 + 1;
+                        const end = Math.min(this.currentPage * 20, response.total);
+                        container.textContent = `Showing ${start}-${end} з ${response.total} books`;
+                    }
+                } else {
+                    if (response.count === 0) {
+                        container.textContent = 'Nothing have found in Project Gutenberg';
+                    } else {
+                        const start = (this.currentPage - 1) * 20 + 1;
+                        const end = Math.min(this.currentPage * 20, response.count);
+                        container.textContent = `Showing ${start}-${end} з ${response.count} results from Project Gutenberg`;
+                    }
+                }
+            }
+
+            goToPage(page) {
+                this.currentPage = page;
+                this.loadBooks();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            showAddBookModal(bookId, bookTitle, isGutenberg, gutenbergId = null) {
+                document.getElementById('selected-book-id').value = bookId || '';
+                document.getElementById('selected-gutenberg-id').value = gutenbergId || '';
+                document.getElementById('is-gutenberg-book').value = isGutenberg.toString();
+                
+                const modalTitle = document.getElementById('add-book-title');
+                modalTitle.textContent = `Add "${bookTitle}" to collection`;
+                
+                document.getElementById('add-book-modal').classList.add('show');
+            }
+
+            async handleAddToCollection() {
+                const bookId = document.getElementById('selected-book-id').value;
+                const gutenbergId = document.getElementById('selected-gutenberg-id').value;
+                const isGutenberg = document.getElementById('is-gutenberg-book').value === 'true';
+                const status = document.getElementById('book-status').value;
+                const bookmarkPosition = parseInt(document.getElementById('bookmark-position').value) || 0;
+
+                try {
+                    let finalBookId = bookId;
+                    
+                    if (isGutenberg && gutenbergId) {
+                        const importedBook = await this.api.importGutenbergBook(gutenbergId);
+                        finalBookId = importedBook.id;
+                    }
+
+                    if (!finalBookId) {
+                        throw new Error('Unable to determine book ID');
+                    }
+
+                    await this.api.addBookToCollection(finalBookId, {
+                        book_id: parseInt(finalBookId),
+                        status: status,
+                        bookmark_position: bookmarkPosition,
+                        is_local: false
+                    });
+
+                    this.showMessage('Book has been successfully added to collection!', 'success');
+                    hideAddBookModal();
+                    
+                    if (this.currentMode === 'catalog') {
+                        await this.loadBooks();
+                    }
+                    
+                } catch (error) {
+                    this.showMessage('Book adding error: ' + error.message, 'error');
+                }
+            }
+
+            viewInLibrary(userBookId) {
+                window.location.href = `/static/profile.html#library`;
+            }
+
+            openGutenbergBook(gutenbergId) {
+                window.open(`https://www.gutenberg.org/ebooks/${gutenbergId}`, '_blank');
+            }
+
+            showLoading(show) {
+                const container = document.getElementById('catalog-results');
+                if (show) {
+                    container.classList.add('loading');
+                } else {
+                    container.classList.remove('loading');
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                let container = document.getElementById('messages-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'messages-container';
+                    container.className = 'messages-container';
+                    document.body.appendChild(container);
+                }
+
+                const messageEl = document.createElement('div');
+                messageEl.className = `alert alert-${type}`;
+                messageEl.textContent = message;
+
+                container.appendChild(messageEl);
+
+                setTimeout(() => {
+                    messageEl.remove();
+                }, 5000);
+            }
+        }
+
+        function hideAddBookModal() {
+            document.getElementById('add-book-modal').classList.remove('show');
+            document.getElementById('add-book-form').reset();
+            document.getElementById('selected-book-id').value = '';
+            document.getElementById('selected-gutenberg-id').value = '';
+            document.getElementById('is-gutenberg-book').value = 'false';
+        }
+
+        let catalog;
+        document.addEventListener('DOMContentLoaded', () => {
+            catalog = new BooksCatalog();
+        });
+    </script>
+</body>
+</html>
