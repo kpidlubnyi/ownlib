@@ -1,9 +1,7 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router  
@@ -19,22 +17,12 @@ app = FastAPI(
     title="OwnLib API",
     description="API for the OwnLib digital library",
     version="1.0.0",
-    debug=DEBUG,
-    docs_url="/docs" if DEBUG else None,
-    redoc_url="/redoc" if DEBUG else None
+    debug=DEBUG
 )
-
-if not DEBUG:
-    app.add_middleware(
-        TrustedHostMiddleware, 
-        allowed_hosts=["*.render.com", "localhost"]
-    )
-
-app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS if ALLOWED_ORIGINS != ["*"] else ["*"],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,18 +40,51 @@ app.include_router(stats_router, prefix="/api")
 app.include_router(library_router, prefix="/api")
 app.include_router(import_export_router, prefix="/api")
 
+
+from fastapi.responses import FileResponse
+
 @app.get("/")
-async def root():
+async def read_index():
+    """
+    Serve the main page
+    """
+    return FileResponse('app/static/index.html')
+
+
+@app.get("/api")
+async def api_info():
+    """
+    API information endpoint
+    """
     return {
         "message": "Welcome to the OwnLib API",
-        "version": "1.0.0",
-        "environment": "production" if not DEBUG else "development"
+        "docs": "/docs",
+        "redoc": "/redoc", 
+        "version": "1.0.0"
     }
+
+
+@app.get("/catalog")
+async def catalog():
+    return FileResponse('app/static/catalog.html')
+
+
+@app.get("/profile") 
+async def profile():
+    return FileResponse('app/static/profile.html')
+
+
+@app.get("/faq")
+async def faq():
+    return FileResponse('app/static/faq.html')
+
 
 @app.get("/health")
 async def health_check():
+    """
+    Check the status of the application
+    """
     return {
         "status": "healthy",
-        "version": "1.0.0",
-        "environment": "production" if not DEBUG else "development"
+        "version": "1.0.0"
     }
